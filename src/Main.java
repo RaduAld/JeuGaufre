@@ -1,13 +1,20 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-void main() {
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    IO.println(String.format("Hello and welcome!"));
+import Modele.Jeu;
 
-    for (int i = 1; i <= 5; i++) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        IO.println("i = " + i);
-    }
+void main() {
+    int firstPlayer = 0;
+    Jeu monJeu = new Jeu(firstPlayer);
+    monJeu.afficheGrille();
+    monJeu.joue(2,2);
+    monJeu.joue(1,4);
+    monJeu.afficheGrille();
+
+    monJeu.annule();
+    monJeu.afficheGrille();
+
+    monJeu.annule();
+    monJeu.afficheGrille();
+
+    monJeu.refais();
+    monJeu.afficheGrille();
+
 }
