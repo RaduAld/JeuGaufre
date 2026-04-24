@@ -42,6 +42,14 @@ public class Jeu {
         grille[0][0] = 2;//Le poison
     }
 
+    public int getJoueur(){
+        return joueur;
+    }
+
+    public int[][] getGrille(){
+        return grille;
+    }
+
     public void joueurSuivant(){
         joueur = (joueur+1)%2;
     }
