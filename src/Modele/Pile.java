@@ -2,7 +2,7 @@ package Modele;
 
 import java.util.ArrayList;
 
-class Pile<T> {
+public class Pile<T> {
 
     private ArrayList<T> pile;
 
