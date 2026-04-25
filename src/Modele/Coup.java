@@ -16,16 +16,10 @@ public class Coup {
     }
 
     //Getters
-    public int getI(){
-        return i;
-    }
+    public int getI(){ return i; }
 
-    public int getJ(){
-        return j;
-    }
+    public int getJ(){ return j; }
 
-    public ArrayList<int[]> getChangedToZero(){
-        return changedToZero;
-    }
+    public ArrayList<int[]> getChangedToZero(){ return changedToZero; }
 
 }

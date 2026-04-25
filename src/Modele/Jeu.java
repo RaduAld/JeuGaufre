@@ -8,11 +8,11 @@ import java.util.ArrayList;
  sauvegarder et restaurer une partie et son historique complet
  */
 public class Jeu {
-    int[][] grille;         // lignes * colonnes
-    int joueur;             // 0 ou 1
-    int lignes;             // 5 en standard
-    int colonnes;           // 7 en standard
-    Historique historique;  // Sauvegarde des coups
+    private int[][] grille;         // lignes * colonnes
+    private int joueur;             // 0 ou 1
+    private int lignes;             // 5 en standard
+    private int colonnes;           // 7 en standard
+    private Historique historique;  // Sauvegarde des coups
     // 0 - vide, 1 - gaufre, 2 - poison
 
     public Jeu(int lignes, int colonnes, int joueur) {
@@ -32,14 +32,11 @@ public class Jeu {
     public Jeu(int joueur) {    //  Avec dimensions par default
         this(5, 7, joueur);
     }
-
-    public int getJoueur(){
-        return joueur;
-    }
-
-    public int[][] getGrille(){
-        return grille;
-    }
+    public int getJoueur() { return joueur; }
+    public int getLignes() { return lignes; }
+    public int getColonnes() { return colonnes; }
+    public int[][] getGrille() { return grille; }
+    public Historique getHistorique() { return historique; }
 
     public void joueurSuivant(){
         joueur = (joueur+1)%2;

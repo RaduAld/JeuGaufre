@@ -3,8 +3,8 @@ package Modele;
 import java.util.ArrayList;
 
 public class Historique {
-    Pile<Coup> passe;
-    Pile<Coup> futur;
+    private Pile<Coup> passe;
+    private Pile<Coup> futur;
     Historique(){
         passe = new Pile<>();
         futur = new Pile<>();
@@ -42,5 +42,7 @@ public class Historique {
         return true;
 
     }
+
+    // Getters
 
 }
