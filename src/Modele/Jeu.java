@@ -13,6 +13,7 @@ public class Jeu {
     private int lignes;             // 5 en standard
     private int colonnes;           // 7 en standard
     private Historique historique;  // Sauvegarde des coups
+    int vainqueur;
     // 0 - vide, 1 - gaufre, 2 - poison
 
     public Jeu(int lignes, int colonnes, int joueur) {
@@ -44,14 +45,14 @@ public class Jeu {
 
     //  True si le joueur a joué, false sinon
     public boolean joue(int l, int c){
-        if (l>= lignes || c>= colonnes || l<0 ||c<0 || grille[l][c]==0){
+        if (jeuTermine() || l>= lignes || c>= colonnes || l<0 ||c<0 || grille[l][c]==0){
             return false;
         }
         else{
             ArrayList<int[]> listeCases = new ArrayList<>();
             for (int i = l; i< lignes; i++){
                 for (int j = c; j< colonnes; j++){
-                    if(grille[i][j]==1) {
+                    if(grille[i][j]>0) {
                         grille[i][j]=0;
                         listeCases.add(new int[] {i,j});
                     }
@@ -63,25 +64,50 @@ public class Jeu {
         }
     }
 
+    public boolean jeuTermine(){
+        return grille[0][0]== 0;
+    }
+
+    public void nouvellePartie(){
+        historique = new Historique();
+        grille = new int[lignes][colonnes];
+        for (int i = 0; i < lignes; i++) {
+            for (int j = 0; j < colonnes; j++) {
+                grille[i][j] = 1;
+            }
+        }
+        grille[0][0] = 2;
+        joueur = 0;
+    }
+
     // True si annuler est possible, false sinon
-    public boolean annule(){
-        if( historique.annule(grille)){
+    public Coup annule(){
+        Coup c = historique.annule(grille);
+        if(c != null){
             joueurSuivant();
-            return true;
+            return c;
         }
         else{
-            return false;
+            return null;
         }
     }
 
+    public boolean peutAnnuler(){
+        return historique.peutAnnuler();
+    }
+    public boolean peutRefaire(){
+        return historique.peutRefaire();
+    }
+
     // True si refaire est possible, false sinon
-    public boolean refais(){
-        if( historique.refais(grille)){
+    public Coup refais(){
+        Coup c = historique.refais(grille);
+        if(c != null){
             joueurSuivant();
-            return true;
+            return c;
         }
         else{
-            return false;
+            return null;
         }
     }
 

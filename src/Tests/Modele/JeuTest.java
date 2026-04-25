@@ -155,36 +155,36 @@ public class JeuTest {
         assertTrue("coup 2 doit être valide", jeu.joue(3, 0));  // coup 2
 
         // Annule coup 2
-        assertTrue(jeu.annule());
+        assertTrue(jeu.peutAnnuler());
         assertEquals("Apres undo coup 2 : joueur doit être 1", 1, jeu.getJoueur());
         assertEquals("(3,0) doit être restaurée à 1", 1, jeu.getGrille()[3][0]);
 
         // Annule coup 1
-        assertTrue(jeu.annule());
+        assertTrue(jeu.peutAnnuler());
         assertEquals("Apres undo coup 1 : joueur doit être 0", 0, jeu.getJoueur());
         assertEquals("(2,2) doit être restaurée à 1", 1, jeu.getGrille()[2][2]);
         assertEquals("(3,3) doit être restaurée à 1", 1, jeu.getGrille()[3][3]);
 
         // Refait coup 1
-        assertTrue(jeu.refais());
+        assertTrue(jeu.peutRefaire());
         assertEquals("(2,2) doit repasser à 0", 0, jeu.getGrille()[2][2]);
         assertEquals("(3,3) doit repasser à 0", 0, jeu.getGrille()[3][3]);
         assertEquals("Joueur doit être 1 apres redo coup 1", 1, jeu.getJoueur());
 
         // Refait coup 2
-        assertTrue(jeu.refais());
+        assertTrue(jeu.peutRefaire());
         assertEquals("(3,0) doit repasser a 0", 0, jeu.getGrille()[3][0]);
         assertEquals("Joueur doit être 0 apres redo coup 2", 0, jeu.getJoueur());
 
         // Plus rien à refaire
-        assertFalse("Redo sur pile vide doit échouer", jeu.refais());
+        assertFalse("Redo sur pile vide doit échouer", jeu.peutRefaire());
     }
 
     @Test
     public void testAnnuleSansHistoriqueNeCassePasLEtat() {
         Jeu jeu = new Jeu(3, 4, 0);
 
-        assertFalse("Annuler sans coup joue doit échouer", jeu.annule());
+        assertFalse("Annuler sans coup joue doit échouer", jeu.peutAnnuler());
         assertEquals("Le joueur ne doit pas changer", 0, jeu.getJoueur());
         assertEquals("La grille ne doit pas être modifiée", 2, jeu.getGrille()[0][0]);
         assertEquals("La grille ne doit pas être modifiée", 1, jeu.getGrille()[2][3]);
@@ -195,7 +195,7 @@ public class JeuTest {
         Jeu jeu = new Jeu(3, 4, 0);
         jeu.joue(2, 2);
 
-        assertFalse("Refaire sans futur doit échouer", jeu.refais());
+        assertFalse("Refaire sans futur doit échouer", jeu.peutRefaire());
         assertEquals("Le joueur ne doit pas changer", 1, jeu.getJoueur());
         assertEquals("La case jouée doit rester a 0", 0, jeu.getGrille()[2][2]);
     }

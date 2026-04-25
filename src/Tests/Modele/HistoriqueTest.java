@@ -50,13 +50,13 @@ public class HistoriqueTest {
         Jeu jeu = new Jeu(3, 4, 0);
         jeu.joue(1, 2);
 
-        assertTrue("L'annulation du dernier coup devrait reussir", jeu.annule());
+        assertTrue("L'annulation du dernier coup devrait reussir", jeu.peutAnnuler());
 
         int[][] grille = jeu.getGrille();
         assertEquals("Le joueur doit revenir au joueur precedent", 0, jeu.getJoueur());
         assertEquals("La case jouee doit etre restauree", 1, grille[1][2]);
         assertEquals("Les cases modifiees doivent etre restaurees", 1, grille[2][3]);
-        assertFalse("Un second undo immediat doit echouer sans historique", jeu.annule());
+        assertFalse("Un second undo immediat doit echouer sans historique", jeu.peutAnnuler());
     }
 
     @Test
@@ -65,13 +65,13 @@ public class HistoriqueTest {
         jeu.joue(1, 2);
         jeu.annule();
 
-        assertTrue("Le redo devrait reussir apres un undo", jeu.refais());
+        assertTrue("Le redo devrait reussir apres un undo", jeu.peutRefaire());
 
         int[][] grille = jeu.getGrille();
         assertEquals("Le joueur doit rechanger apres redo", 1, jeu.getJoueur());
         assertEquals("La case rejouee doit revenir a 0", 0, grille[1][2]);
         assertEquals("Les cases du coup doivent revenir a 0", 0, grille[2][3]);
-        assertFalse("Un second redo doit echouer si le futur est vide", jeu.refais());
+        assertFalse("Un second redo doit echouer si le futur est vide", jeu.peutRefaire());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class HistoriqueTest {
         jeu.annule();
 
         assertTrue("Le nouveau coup doit etre valide", jeu.joue(2, 2));
-        assertFalse("Le redo doit etre impossible apres un nouveau coup", jeu.refais());
+        assertFalse("Le redo doit etre impossible apres un nouveau coup", jeu.peutRefaire());
 
         int[][] grille = jeu.getGrille();
         assertEquals("Le joueur doit correspondre au nouveau coup joue", 1, jeu.getJoueur());

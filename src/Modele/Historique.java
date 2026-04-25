@@ -16,30 +16,35 @@ public class Historique {
         futur.videPile();
     }
 
-    boolean annule(int[][] grille){
+    Coup annule(int[][] grille){
         if(passe.estVide()){
             System.out.println("Impossible d'annuler");
-            return false;
+            return null;
         }
         Coup c = passe.depiler();
         for (int[] coord : c.changedToZero){
             grille[coord[0]][coord[1]]= 1;
         }
         futur.empiler(c);
-        return true;
+        return c;
     }
-
-    boolean refais (int[][] grille){
+    public boolean peutAnnuler(){
+        return !passe.estVide();
+    }
+    public boolean peutRefaire(){
+        return !futur.estVide();
+    }
+    Coup refais (int[][] grille){
         if(futur.estVide()){
             System.out.println("Impossible de refaire");
-            return false;
+            return null;
         }
         Coup c = futur.depiler();
         for (int[] coord : c.changedToZero){
             grille[coord[0]][coord[1]]= 0;
         }
         passe.empiler(c);
-        return true;
+        return c;
 
     }
 
