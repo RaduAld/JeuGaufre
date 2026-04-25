@@ -1,13 +1,11 @@
-package Tests;
+package Tests.Modele;
 
 import Modele.Jeu;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-
 import static org.junit.Assert.*;
 
-public class TestsHistorique {
+public class HistoriqueTest {
 
     @Test
     public void testInitialisationJeu() throws Exception {

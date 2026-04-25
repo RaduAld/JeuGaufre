@@ -3,43 +3,34 @@ package Modele;
 import java.util.ArrayList;
 
 /*
-démarrer une nouvelle partie (en abandonnant l'état courant)
+ Démarrer une nouvelle partie (en abandonnant l'état courant)
  fonctions annuler et rejouer (conservation de l'historique de tous les coups)
  sauvegarder et restaurer une partie et son historique complet
  */
 public class Jeu {
-    int[][] grille;//a*b
-    int joueur;//0 ou 1
-    int a; //5 en standard
-    int b; //7 en standard
-    Historique historique; //Sauvegarde des coups
+    int[][] grille;         // lignes * colonnes
+    int joueur;             // 0 ou 1
+    int lignes;             // 5 en standard
+    int colonnes;           // 7 en standard
+    Historique historique;  // Sauvegarde des coups
+    // 0 - vide, 1 - gaufre, 2 - poison
 
-    public Jeu(int a, int b, int joueur) {
-        this.a = a;
-        this.b = b;
+    public Jeu(int lignes, int colonnes, int joueur) {
+        this.lignes = lignes;
+        this.colonnes = colonnes;
         this.joueur = joueur;
         historique = new Historique();
-        grille = new int[a][b];
-        for (int i = 0; i < a; i++) {
-            for (int j = 0; j < b; j++) {
+        grille = new int[lignes][colonnes];
+        for (int i = 0; i < lignes; i++) {
+            for (int j = 0; j < colonnes; j++) {
                 grille[i][j] = 1;
             }
         }
-        grille[0][0] = 2;//Le poison
+        grille[0][0] = 2;   // Le poison
     }
 
-    public Jeu(int joueur) {//Avec dimensions par default
-        this.a = 5;
-        this.b = 7;
-        this.joueur = joueur;
-        historique = new Historique();
-        grille = new int[a][b];
-        for (int i = 0; i < a; i++) {
-            for (int j = 0; j < b; j++) {
-                grille[i][j] = 1;
-            }
-        }
-        grille[0][0] = 2;//Le poison
+    public Jeu(int joueur) {    //  Avec dimensions par default
+        this(5, 7, joueur);
     }
 
     public int getJoueur(){
@@ -54,14 +45,15 @@ public class Jeu {
         joueur = (joueur+1)%2;
     }
 
-    public boolean joue(int l, int c){//True si le joueur a jouéé, false sinon
-        if (l>=a || c>= b || l<0 ||c<0 || grille[l][c]==0){
+    //  True si le joueur a joué, false sinon
+    public boolean joue(int l, int c){
+        if (l>= lignes || c>= colonnes || l<0 ||c<0 || grille[l][c]==0){
             return false;
         }
         else{
             ArrayList<int[]> listeCases = new ArrayList<>();
-            for (int i = l; i<a; i++){
-                for (int j = c; j<b; j++){
+            for (int i = l; i< lignes; i++){
+                for (int j = c; j< colonnes; j++){
                     if(grille[i][j]==1) {
                         grille[i][j]=0;
                         listeCases.add(new int[] {i,j});
@@ -74,7 +66,8 @@ public class Jeu {
         }
     }
 
-    public boolean annule(){//True si annuler est possible, false sinon
+    // True si annuler est possible, false sinon
+    public boolean annule(){
         if( historique.annule(grille)){
             joueurSuivant();
             return true;
@@ -84,7 +77,8 @@ public class Jeu {
         }
     }
 
-    public boolean refais(){//True si refaire est possible, false sinon
+    // True si refaire est possible, false sinon
+    public boolean refais(){
         if( historique.refais(grille)){
             joueurSuivant();
             return true;
@@ -95,12 +89,16 @@ public class Jeu {
     }
 
     public void afficheGrille(){
-        System.out.println("Grille :");
-        for(int i=0; i<a; i++){
-            for (int j=0; j<b; j++){
+        System.out.println("-------------------");
+        System.out.println("-----Grille -------");
+        System.out.println("-------------------");
+        for(int i = 0; i< lignes; i++){
+            for (int j = 0; j< colonnes; j++){
                 System.out.print(grille[i][j]+" ");
             }
             System.out.println();
         }
+        System.out.println("-------------------");
+        System.out.println();
     }
 }
