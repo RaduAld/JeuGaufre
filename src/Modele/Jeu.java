@@ -63,7 +63,9 @@ public class Jeu {
             return true;
         }
     }
-
+    public boolean estGauffre(int i,int j){
+        return grille[i][j]!=0;
+    }
     public boolean jeuTermine(){
         return grille[0][0]== 0;
     }

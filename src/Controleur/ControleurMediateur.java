@@ -134,7 +134,7 @@ public class ControleurMediateur implements CollecteurEvenements {
         }
     }
 
-
+//    @Override
 //    public void ajouteInterfaceUtilisateur(InterfaceUtilisateur v) {
 //        vue = v;
 //    }
