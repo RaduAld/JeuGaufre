@@ -38,7 +38,7 @@ public class Configuration {
         // Il faut attendre le dernier moment pour utiliser le logger
         // car celui-ci s'initialise avec les propriétés
         String message = "Fichier de propriétés defaut.cfg chargé";
-        String nom = System.getProperty("user.home") + File.separator + ".sokoban";
+        String nom = System.getProperty("user.home") + File.separator + ".waffle";
         try {
             in = new FileInputStream(nom);
             prop = new Properties(defaut);
@@ -80,7 +80,7 @@ public class Configuration {
     public Logger logger() {
         if (logger == null) {
             System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s : %5$s%n");
-            logger = Logger.getLogger("Sokoban.Logger");
+            logger = Logger.getLogger("Waffle.Logger");
             logger.setLevel(Level.parse(lis("LogLevel")));
         }
         return logger;
@@ -92,9 +92,12 @@ public class Configuration {
         // Attention, par contre, le fichier doit se trouver dans le CLASSPATH
         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(s);
         if (in == null) {
-            // Le logger n'est pas forcément en place à ce moment là
-            System.err.println("impossible de charger le ressource " + s);
-            System.exit(1);
+            try{
+                in = new FileInputStream("res/" + s);
+            } catch (FileNotFoundException e) {
+                System.err.println("impossible de charger le ressource " + s);
+                System.exit(1);
+            }
         }
         return in;
     }
