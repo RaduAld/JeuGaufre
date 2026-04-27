@@ -4,38 +4,40 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-public class InterfaceGraphique implements Runnable{
+public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
     Jeu jeu;
     Gaufre gauf;
     JLabel gameOver,joueur;
     JToggleButton annuler,rejouer;
     JButton sauvegarder,restaurer,nouvellePartie;
-    //CollecteurEvenements control;
+    CollecteurEvenements control;
     JFrame frame;
-    InterfaceGraphique(Jeu j){
+    InterfaceGraphique(Jeu j,CollecteurEvenements c){
         jeu = j;
-        //control = c;
+        control = c;
     }
-    public static void demarrer(Jeu j){
-        InterfaceGraphique vue = new InterfaceGraphique(j);
-        //control.ajouteInterfaceUtilisateur(vue);
+    public static void demarrer(Jeu j,CollecteurEvenements c){
+        InterfaceGraphique vue = new InterfaceGraphique(j,c);
+        c.ajouteInterfaceUtilisateur(vue);
         SwingUtilities.invokeLater(vue);
     }
 
     @Override
     public void run(){
-        frame = new JFrame("Gauffre");
+        frame = new JFrame("Gaufre");
         frame.setSize(800, 400);
+        gauf = new Gaufre(jeu);
 
+        //creer panel de jeu
+        JPanel gameContainer = new JPanel(new BorderLayout());
+        gameContainer.setBorder(new EmptyBorder(50,50,50,50));
+        gameContainer.add(gauf, BorderLayout.CENTER);
+
+        //creer panel de controle
         JPanel droite = new JPanel();
         droite.setLayout(new BoxLayout(droite,BoxLayout.Y_AXIS));
         droite.setBorder(new EmptyBorder(50,50,50,50));
-        JPanel gameContainer = new JPanel(new BorderLayout());
-        gameContainer.setBorder(new EmptyBorder(50,50,50,50));
-
-        gauf = new Gaufre(jeu);
-
-        gameContainer.add(gauf, BorderLayout.CENTER);
+        //creer et ajouter composants d'interface
         joueur = createJLabel("joueur en cours: 1");
         gameOver = createJLabel("Game Over. Joueur 2 a gagne");
         gameOver.setForeground(new Color(131, 11, 11));
@@ -62,6 +64,10 @@ public class InterfaceGraphique implements Runnable{
         droite.setBackground(new Color(180, 125, 107));
         gameContainer.setBackground(new Color(41, 16, 7));
 
+        //retransmission evenements au controleur
+        gauf.addMouseListener(new AdaptateurSouris(gauf,control));
+        //Timer chrono = new Timer(16,)
+        //mise en place interface
         frame.add(gameContainer);
         frame.add(droite,BorderLayout.EAST);
         frame.setVisible(true);

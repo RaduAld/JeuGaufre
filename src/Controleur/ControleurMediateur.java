@@ -7,11 +7,11 @@ import Modele.Jeu;
 //import Structures.Iterateur;
 //import Structures.Sequence;
 import Vue.CollecteurEvenements;
-// import Vue.InterfaceUtilisateur;
+import Vue.InterfaceUtilisateur;
 
 public class ControleurMediateur implements CollecteurEvenements {
     Jeu jeu;
-    // InterfaceUtilisateur vue;
+    InterfaceUtilisateur vue;
     int lenteurPas;
     Animation mouvement;
     boolean animationsSupportees, animationsActives;
@@ -36,8 +36,6 @@ public class ControleurMediateur implements CollecteurEvenements {
         joueursAutomatiques = new IA[2];
     }
 
-
-
     void joue(Coup cp) {
         if (cp != null) {
             jeu.joue(cp.getI(), cp.getJ());
@@ -59,13 +57,6 @@ public class ControleurMediateur implements CollecteurEvenements {
         }
     }
 
-//    void deplace(int dL, int dC) {
-//        if (mouvement == null) {
-//            Coup cp = jeu.elaboreCoup(dL, dC);
-//            if (cp != null)
-//                joue(cp);
-//        }
-//    }
 
     private void testFin() {
             if (jeu.jeuTermine()){
@@ -134,10 +125,10 @@ public class ControleurMediateur implements CollecteurEvenements {
         }
     }
 
-//    @Override
-//    public void ajouteInterfaceUtilisateur(InterfaceUtilisateur v) {
-//        vue = v;
-//    }
+    @Override
+    public void ajouteInterfaceUtilisateur(InterfaceUtilisateur v) {
+        vue = v;
+    }
 
     @Override
     public void tictac() {
@@ -154,19 +145,5 @@ public class ControleurMediateur implements CollecteurEvenements {
         }
     }
 
-//    public void changeEtape() {
-//        vue.changeEtape();
-//    }
-
-//    public void decale(int versL, int versC, double dL, double dC) {
-//        vue.decale(versL, versC, dL, dC);
-//    }
-
-//    public void basculeAnimations() {
-//        if (animationsSupportees && (mouvement == null)) {
-//            animationsActives = !animationsActives;
-//            vue.changeEtatAnimations(animationsActives);
-//        }
-//    }
 
 }

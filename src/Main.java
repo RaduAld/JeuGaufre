@@ -1,4 +1,6 @@
+import Controleur.ControleurMediateur;
 import Modele.Jeu;
+import Vue.CollecteurEvenements;
 import Vue.InterfaceGraphique;
 
 import java.io.IOException;
@@ -20,7 +22,8 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        InterfaceGraphique.demarrer(monJeu);
+        CollecteurEvenements c = new ControleurMediateur(monJeu);
+        InterfaceGraphique.demarrer(monJeu,c);
         // monJeu.afficheGrille();
         // monJeu.joue(2, 2);
         // monJeu.joue(1, 4);

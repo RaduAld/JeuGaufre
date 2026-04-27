@@ -31,8 +31,8 @@ public class Gaufre extends JComponent{
         int width = longueurCase();
         int height = width;
         //dessiner la gaufre
-        for(int i = 0;i<l;i++){
-            for(int j=0;j<c;j++){
+        for(int i = 0;i<jeu.getLignes();i++){
+            for(int j=0;j<jeu.getColonnes();j++){
                 if(jeu.estPresente(i, j)){
                     int x = j * width;
                     int y = i * height;
