@@ -1,10 +1,12 @@
 package Vue;
 import Modele.Jeu;
+import Patterns.Observateur;
+
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
+public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observateur{
     Jeu jeu;
     Gaufre gauf;
     JLabel gameOver,joueur;
@@ -12,9 +14,11 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
     JButton sauvegarder,restaurer,nouvellePartie;
     CollecteurEvenements control;
     JFrame frame;
+
     InterfaceGraphique(Jeu j,CollecteurEvenements c){
         jeu = j;
         control = c;
+
     }
     public static void demarrer(Jeu j,CollecteurEvenements c){
         InterfaceGraphique vue = new InterfaceGraphique(j,c);
@@ -31,25 +35,26 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
         //creer panel de jeu
         JPanel gameContainer = new JPanel(new BorderLayout());
         gameContainer.setBorder(new EmptyBorder(50,50,50,50));
+        gameOver = createJLabel("");
+        gameContainer.add(gameOver);
+        gameOver.setVisible(false);
         gameContainer.add(gauf, BorderLayout.CENTER);
 
         //creer panel de controle
         JPanel droite = new JPanel();
         droite.setLayout(new BoxLayout(droite,BoxLayout.Y_AXIS));
         droite.setBorder(new EmptyBorder(50,50,50,50));
+     
         //creer et ajouter composants d'interface
         joueur = createJLabel("joueur en cours: 1");
-        gameOver = createJLabel("Game Over. Joueur 2 a gagne");
-        gameOver.setForeground(new Color(131, 11, 11));
-        gameOver.setVisible(false);
         annuler = createToggleButton("annuler");
         rejouer = createToggleButton("rejouer");
         sauvegarder= createJButton("sauvegarder");
         restaurer=createJButton("restaurer");
         nouvellePartie=createJButton("nouvelle partie");
+     
         droite.add(Box.createGlue());
         droite.add(joueur);
-        droite.add(gameOver);
         droite.add(Box.createVerticalStrut(40));
         droite.add(annuler);
         droite.add(Box.createVerticalStrut(10));
@@ -61,18 +66,29 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
         droite.add(Box.createGlue());
         droite.add(nouvellePartie);
         droite.add(Box.createGlue());
+      
         droite.setBackground(new Color(180, 125, 107));
         gameContainer.setBackground(new Color(41, 16, 7));
 
         //retransmission evenements au controleur
         gauf.addMouseListener(new AdaptateurSouris(gauf,control));
+        annuler.addActionListener(new AdaptateurAnnuler( control));
+        rejouer.addActionListener(new AdaptateurRejouer(control));
+        sauvegarder.addActionListener(new AdaptateurSauvegarder(control));
+        restaurer.addActionListener(new AdaptateurRestaurer(control));
+        nouvellePartie.addActionListener(new AdaptateurNouvellePartie( control));
+        
+        jeu.ajouteObservateur(this);
+        
         //Timer chrono = new Timer(16,)
+      
         //mise en place interface
         frame.add(gameContainer);
         frame.add(droite,BorderLayout.EAST);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+    
     private JButton createJButton(String texte){
         JButton button = new JButton(texte);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -83,6 +99,7 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
         button.setBorderPainted(false);
         return button;
     }
+    
     private JToggleButton createToggleButton(String texte){
         JToggleButton toggleButton = new JToggleButton(texte);
         toggleButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -93,6 +110,7 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
         toggleButton.setBorderPainted(false);
         return toggleButton;
     }
+    
     private JLabel createJLabel(String texte){
         JLabel label = new JLabel(texte);
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -100,14 +118,32 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur{
         label.setForeground(new Color(41, 16, 7));
         return label;
     }
-    private Box createHorizontalBox(){
-        Box horiz = Box.createHorizontalBox();
-        horiz.setAlignmentX(Component.CENTER_ALIGNMENT);
-        return horiz;
+
+    @Override
+    public void miseAJour() {
+        gauf.repaint();
+        int joueurEnCours = jeu.getJoueur() + 1;
+        joueur.setText("joueur en cours: " + joueurEnCours);
+        if (jeu.jeuTermine()) {
+           defaite(joueurEnCours);
+        }
+
+
     }
-    private Box createVerticalBox(){
-        Box vertic = Box.createVerticalBox();
-        vertic.setAlignmentX(Component.CENTER_ALIGNMENT);
-        return vertic;
+
+    public void defaite(int joueurGagnant) {
+        gameOver.setText("Game Over - Joueur " + joueurGagnant + " gagne !");
+        gameOver.setVisible(true);
+        gauf.setVisible(false);
+
+        annuler.setEnabled(false);
+        rejouer.setEnabled(false);
+        sauvegarder.setEnabled(false);
+        restaurer.setEnabled(false);
+        nouvellePartie.setEnabled(true);
     }
+
 }
+
+
+

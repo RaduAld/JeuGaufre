@@ -1,6 +1,7 @@
 package Modele;
 
 import Global.Configuration;
+import Patterns.Observable;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
  fonctions annuler et rejouer (conservation de l'historique de tous les coups)
  sauvegarder et restaurer une partie et son historique complet
  */
-public class Jeu {
+public class Jeu extends Observable {
     private boolean[] grille;         // lignes * colonnes
     private int joueur;             // 0 ou 1
     private int lignes;             // 5 en standard
@@ -30,6 +31,7 @@ public class Jeu {
         historique = new Historique();
         grille = new boolean[lignes * colonnes];
         initialiserGrille();
+        
     }
 
     public Jeu(int joueur) {    //  Avec dimensions par default
@@ -140,6 +142,7 @@ public class Jeu {
             }
             historique.joue(l, c, listeCases);
             joueurSuivant();
+            metAJour();
             return true;
         }
     }
@@ -153,6 +156,8 @@ public class Jeu {
         grille = new boolean[lignes * colonnes];
         initialiserGrille();
         joueur = 0;
+
+         metAJour();
     }
 
     // -------------------------------------------------------------------------
@@ -172,6 +177,7 @@ public class Jeu {
         Coup c = historique.annule(grille);
         if (c != null) {
             joueurSuivant();
+            metAJour();
             return c;
         }
         else {
@@ -184,6 +190,7 @@ public class Jeu {
         Coup c = historique.refais(grille);
         if (c != null) {
             joueurSuivant();
+            metAJour();
             return c;
         }
         else {
@@ -201,10 +208,10 @@ public class Jeu {
      *   lignes colonnes joueur
      *   <grille : suite de '1' (présente) et '0' (mangée), sans séparateur>
      *   <nb_coups_passés>
-     *   l c k1 k2 k3 ...    ← un coup par ligne, du plus ancien au plus récent
+     *   l c k1 k2 k3 ...     un coup par ligne, du plus ancien au plus récent
      *   ...
      *   <nb_coups_futurs>
-     *   l c k1 k2 k3 ...    ← un coup par ligne, du prochain redo au plus lointain
+     *   l c k1 k2 k3 ...     un coup par ligne, du prochain redo au plus lointain
      *   ...
      *
      * Exemple minimal (3×4, joueur 1, un coup joué en (1,2)) :
@@ -255,6 +262,7 @@ public class Jeu {
                 bw.newLine();
             }
         }
+        metAJour();
     }
 
     // Encode un Coup en une ligne : "l c k1 k2 k3 ..."
@@ -314,6 +322,7 @@ public class Jeu {
             this.grille     = nouvGrille;
             this.historique = new Historique();
             this.historique.restaurer(passeChrono, futurChrono);
+            metAJour();
         }
     }
 

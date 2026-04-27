@@ -32,6 +32,7 @@ public class Configuration {
 
     protected Configuration() {
         // On charge les propriétés
+
         InputStream in = ouvre("defaut.cfg");
         Properties defaut = new Properties();
         chargerProprietes(defaut, in, "defaut.cfg");
@@ -90,6 +91,7 @@ public class Configuration {
         // La méthode de chargement suivante ne dépend pas du système de fichier
         // et sera donc utilisable pour un .jar
         // Attention, par contre, le fichier doit se trouver dans le CLASSPATH
+
         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(s);
         if (in == null) {
             try{

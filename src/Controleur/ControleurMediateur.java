@@ -1,4 +1,6 @@
 package Controleur;
+import java.io.IOException;
+
 import Global.Configuration;
 import Modele.Coup;
 import Modele.IA;
@@ -57,11 +59,28 @@ public class ControleurMediateur implements CollecteurEvenements {
         }
     }
 
+void sauvegarder() {
+    try {
+        jeu.sauvegarder("game1.txt");
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+void restaurer() {
+    try {
+        jeu.charger("game1.txt");
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
 
     private void testFin() {
             if (jeu.jeuTermine()){
-                Configuration.info("Partie finie ! Le vainqueur est: : "+ jeu.getJoueur());
-                System.exit(0);
+                int gagnant = (jeu.getJoueur() + 1) % 2;
+                Configuration.info("Partie finie ! Le vainqueur est: : "+ gagnant);
+
             }
     }
 
@@ -100,9 +119,14 @@ public class ControleurMediateur implements CollecteurEvenements {
     @Override
     public void toucheClavier(String touche) {
         switch (touche) {
-
             case "Undo":
                 annule();
+                break;
+            case "Restore":
+                restaurer();
+                break;
+            case "Save":
+                sauvegarder();
                 break;
             case "Redo":
                 refait();
@@ -125,7 +149,7 @@ public class ControleurMediateur implements CollecteurEvenements {
         }
     }
 
-    @Override
+        @Override
     public void ajouteInterfaceUtilisateur(InterfaceUtilisateur v) {
         vue = v;
     }

@@ -5,10 +5,12 @@ import java.awt.*;
 
 public class Gaufre extends JComponent{
     Jeu jeu;
+    
     public Gaufre(Jeu j){
         jeu = j;
         this.setMinimumSize(new Dimension(100, 100));
     }
+
     public void dessineCarre(Graphics2D g,int i,int j,int width,int height){
         Color brown = new Color(224, 133, 57);
         g.setColor(brown);
@@ -19,11 +21,13 @@ public class Gaufre extends JComponent{
         g.drawRect(i, j,width,height);
 
     }
+   
     public void dessinePoison(Graphics2D g,int width,int height) {
         Color green = new Color(13, 98, 47);
         g.setColor(green);
         g.fillOval(width/3, height/3,width/3,height/3);
     }
+  
     @Override
     public void paintComponent(Graphics g){
         Graphics2D drawable = (Graphics2D) g;
@@ -42,6 +46,7 @@ public class Gaufre extends JComponent{
         }
         dessinePoison(drawable,width,height);
     }
+  
     public int longueurCase(){
         int l = jeu.getLignes();
         int c = jeu.getColonnes();

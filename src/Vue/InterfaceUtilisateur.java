@@ -1,4 +1,5 @@
 package Vue;
-public interface InterfaceUtilisateur{
-
+public interface InterfaceUtilisateur {
+	void miseAJour();
 }
+

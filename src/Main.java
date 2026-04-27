@@ -9,8 +9,9 @@ public class Main {
     public static void main(String[] args) {
         int firstPlayer = 0;
         Jeu monJeu = new Jeu(firstPlayer);
+        
 
-        try {
+      /*  try {
             // loads the game from the given nomFichier file
             monJeu.charger("game0.txt");
         } catch (IOException e) {
@@ -22,20 +23,8 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        */
         CollecteurEvenements c = new ControleurMediateur(monJeu);
         InterfaceGraphique.demarrer(monJeu,c);
-        // monJeu.afficheGrille();
-        // monJeu.joue(2, 2);
-        // monJeu.joue(1, 4);
-        // monJeu.afficheGrille();
-
-        // monJeu.annule();
-        // monJeu.afficheGrille();
-
-        // monJeu.annule();
-        // monJeu.afficheGrille();
-
-        // monJeu.refais();
-        // monJeu.afficheGrille();
     }
 }

@@ -33,7 +33,7 @@ public abstract class IA {
     }
 
     public final Pile<Coup> elaboreCoups() {
-        grille = jeu.getGrille().clone();
+        //grille = jeu.getGrille().clone();
         return joue();
     }
 
