@@ -2,6 +2,8 @@ package Vue;
 import Modele.Jeu;
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
 public class InterfaceGraphique implements Runnable{
     Jeu jeu;
     Gaufre gauf;
@@ -24,7 +26,10 @@ public class InterfaceGraphique implements Runnable{
     public void run(){
         frame = new JFrame("Gauffre");
         frame.setSize(800, 400); 
-        Box droite = createVerticalBox();
+        //Box droite = createVerticalBox();
+        JPanel droite = new JPanel();
+        droite.setLayout(new BoxLayout(droite,BoxLayout.Y_AXIS));
+        droite.setBorder(new EmptyBorder(50,50,50,50));
         JPanel gameContainer = new JPanel(new BorderLayout());
         gauf = new Gaufre(jeu);
         gameContainer.add(gauf, BorderLayout.CENTER);
@@ -34,15 +39,19 @@ public class InterfaceGraphique implements Runnable{
         sauvegarder= createJButton("sauvegarder");
         restaurer=createJButton("restaurer");
         nouvellePartie=createJButton("nouvelle partie");
-        
-        droite.add(joueur);
+        //droite.add(Box.createGlue());
+        droite.add(joueur,BorderLayout.CENTER);
+        //droite.add(Box.createGlue());
         droite.add(annuler);
         droite.add(rejouer);
+        //droite.add(Box.createGlue());
         droite.add(sauvegarder);
         droite.add(restaurer);
+        //droite.add(Box.createGlue());
         droite.add(nouvellePartie);
-        frame.add(droite,BorderLayout.EAST);
+        //droite.add(Box.createGlue());
         frame.add(gameContainer);
+        frame.add(droite,BorderLayout.EAST);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }

@@ -22,7 +22,7 @@ public class Gaufre extends JComponent{
     public void dessinePoison(Graphics2D g,int width,int height) {
         Color green = new Color(13, 98, 47);
         g.setColor(green);
-        g.fillOval(width/4, height/4,width/2,height/2);
+        g.fillOval(width/3, height/3,width/3,height/3);
     }
     @Override
     public void paintComponent(Graphics g){
@@ -38,7 +38,7 @@ public class Gaufre extends JComponent{
         //dessiner la gaufre
         for(int i = 0;i<l;i++){
             for(int j=0;j<c;j++){
-                if(jeu.estGauffre(i, j)){
+                if(jeu.estPresente(i, j)){
                     int x = j * width;
                     int y = i * height;
                     dessineCarre(drawable,x,y,width,height);
