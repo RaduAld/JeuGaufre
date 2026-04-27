@@ -46,6 +46,56 @@ public class Historique {
         return c;
     }
 
+    // -------------------------------------------------------------------------
+    // Sauvegarde / Chargement
+    // -------------------------------------------------------------------------
+
+    // Retourne les coups du passé du plus ancien au plus récent (ordre de jeu).
+    // Draine la pile puis la reconstitue à l'identique — ne modifie pas l'état logique.
+    public ArrayList<Coup> getCoupsPasse() {
+        return extraireOrdreChronologique(passe);
+    }
+
+    // Retourne les coups du futur du prochain redo au plus lointain.
+    // Draine la pile puis la reconstitue à l'identique — ne modifie pas l'état logique.
+    public ArrayList<Coup> getCoupsFutur() {
+        return extraireOrdreChronologique(futur);
+    }
+
+    // Draine la pile dans une liste (sommet en tête), puis la recharge à l'identique.
+    // Retourne la liste dans l'ordre chronologique (base de pile = index 0).
+    private ArrayList<Coup> extraireOrdreChronologique(Pile<Coup> pile) {
+        // Étape 1 : vider la pile dans une liste temporaire (sommet d'abord)
+        ArrayList<Coup> inversee = new ArrayList<>();
+        while (!pile.estVide()) {
+            inversee.add(pile.depiler());
+        }
+        // Étape 2 : remettre dans la pile (restitue l'ordre original)
+        for (int i = inversee.size() - 1; i >= 0; i--) {
+            pile.empiler(inversee.get(i));
+        }
+        // Étape 3 : inverser la liste pour avoir l'ordre chronologique (base = index 0)
+        ArrayList<Coup> chrono = new ArrayList<>(inversee.size());
+        for (int i = inversee.size() - 1; i >= 0; i--) {
+            chrono.add(inversee.get(i));
+        }
+        return chrono;
+    }
+
+    // Reconstruit les piles à partir de listes ordonnées (utilisé au chargement).
+    // passeChrono : du plus ancien au plus récent.
+    // futurChrono : du prochain redo au plus lointain.
+    public void restaurer(ArrayList<Coup> passeChrono, ArrayList<Coup> futurChrono) {
+        passe.videPile();
+        futur.videPile();
+        for (Coup c : passeChrono) {
+            passe.empiler(c);
+        }
+        for (Coup c : futurChrono) {
+            futur.empiler(c);
+        }
+    }
+
     // Getters
     public boolean peutAnnuler() { return !passe.estVide(); }
     public boolean peutRefaire() { return !futur.estVide(); }
