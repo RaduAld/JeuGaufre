@@ -5,18 +5,18 @@ public class Main {
         int firstPlayer = 0;
         Jeu monJeu = new Jeu(firstPlayer);
         InterfaceGraphique.demarrer(monJeu);
-        monJeu.afficheGrille();
-        monJeu.joue(2, 2);
-        monJeu.joue(1, 4);
-        monJeu.afficheGrille();
+        // monJeu.afficheGrille();
+        // monJeu.joue(2, 2);
+        // monJeu.joue(1, 4);
+        // monJeu.afficheGrille();
 
-        monJeu.annule();
-        monJeu.afficheGrille();
+        // monJeu.annule();
+        // monJeu.afficheGrille();
 
-        monJeu.annule();
-        monJeu.afficheGrille();
+        // monJeu.annule();
+        // monJeu.afficheGrille();
 
-        monJeu.refais();
-        monJeu.afficheGrille();
+        // monJeu.refais();
+        // monJeu.afficheGrille();
     }
 }

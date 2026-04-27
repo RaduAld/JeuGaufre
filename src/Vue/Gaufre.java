@@ -7,6 +7,7 @@ public class Gaufre extends JComponent{
     Jeu jeu;
     public Gaufre(Jeu j){
         jeu = j;
+        this.setMinimumSize(new Dimension(100, 100));
     }
     public void dessineCarre(Graphics2D g,int i,int j,int width,int height){
         Color brown = new Color(224, 133, 57);
