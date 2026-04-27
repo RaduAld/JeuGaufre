@@ -17,8 +17,8 @@ public class MainIA {
             Pile<Coup> coupIA = ias[joueurCourant].elaboreCoups();
             if (coupIA != null && !coupIA.estVide()) {
                 Coup coupAJouer = coupIA.depiler();
-                System.out.println("coup joué : " + coupAJouer.getI() + " " + coupAJouer.getJ());
-                jeu.joue(coupAJouer.getI(), coupAJouer.getJ());
+                System.out.println("coup joué : " + coupAJouer.getL() + " " + coupAJouer.getC());
+                jeu.joue(coupAJouer.getL(), coupAJouer.getC());
 
             } else {// ??? aucun coup généré
                 System.out.println("aucun coup genere ??");

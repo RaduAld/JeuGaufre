@@ -2,46 +2,60 @@ package Modele;
 
 import java.util.ArrayList;
 
+/**
+ * Historique des coups du Jeu de Gaufre
+ *
+ * Deux piles :
+ *   passe  — coups joués (sommet = dernier coup)
+ *   futur  — coups annulés prêts à être refaits (sommet = prochain redo)
+ *
+ * Undo : restaure grille[0..savedSegment.length-1] depuis la sauvegarde
+ * Redo : ré-applique le coup via GrilleHelper.applyMove (lire/modifier/réécrire)
+ */
 public class Historique {
-    private Pile<Coup> passe;
-    private Pile<Coup> futur;
+
+    private final Pile<Coup> passe;
+    private final Pile<Coup> futur;
 
     Historique() {
         passe = new Pile<>();
         futur = new Pile<>();
     }
 
-    // Enregistre un coup : stocke les index linéaires des cases passées à false
-    void joue(int i, int j, ArrayList<Integer> changedToFalse) {
-        Coup c = new Coup(i, j, changedToFalse);
-        passe.empiler(c);
+    void joue(Coup coup) {
+        passe.empiler(coup);
         futur.videPile();
     }
 
-    // Annule le dernier coup : remet à true toutes les cases du coup dépilé
+    /**
+     * Annule le dernier coup : restaure grille[0..savedSegment.length-1]
+     */
     Coup annule(boolean[] grille) {
         if (passe.estVide()) {
-            System.out.println("Impossible d'annuler");
+            System.out.println("Impossible d'annuler : aucun coup dans le passé.");
             return null;
         }
         Coup c = passe.depiler();
-        for (int k : c.changedToFalse) {
-            grille[k] = true;
-        }
+        boolean[] seg = c.getSavedSegment();
+        System.arraycopy(seg, 0, grille, 0, seg.length);
         futur.empiler(c);
         return c;
     }
 
-    // Rejoue le coup suivant : remet à false toutes les cases du coup dépilé
-    Coup refais(boolean[] grille) {
+    /**
+     * Rejoue le coup suivant : ré-applique son effet via GrilleHelper.applyMove
+     *
+     * @param grille   vecteur de bits de Jeu, modifié en place
+     * @param lignes   M — nécessaire pour lire toutes les largeurs
+     * @param colonnes N — nécessaire pour réécrire toute la grille
+     */
+    Coup refais(boolean[] grille, int lignes, int colonnes) {
         if (futur.estVide()) {
-            System.out.println("Impossible de refaire");
+            System.out.println("Impossible de refaire : aucun coup dans le futur.");
             return null;
         }
         Coup c = futur.depiler();
-        for (int k : c.changedToFalse) {
-            grille[k] = false;
-        }
+        GrilleHelper.applyMove(grille, c.getL(), c.getC(), lignes, colonnes);
         passe.empiler(c);
         return c;
     }
@@ -50,53 +64,25 @@ public class Historique {
     // Sauvegarde / Chargement
     // -------------------------------------------------------------------------
 
-    // Retourne les coups du passé du plus ancien au plus récent (ordre de jeu).
-    // Draine la pile puis la reconstitue à l'identique — ne modifie pas l'état logique.
-    public ArrayList<Coup> getCoupsPasse() {
-        return extraireOrdreChronologique(passe);
-    }
+    public ArrayList<Coup> getCoupsPasse() { return extraireOrdreChronologique(passe); }
+    public ArrayList<Coup> getCoupsFutur() { return extraireOrdreChronologique(futur); }
 
-    // Retourne les coups du futur du prochain redo au plus lointain.
-    // Draine la pile puis la reconstitue à l'identique — ne modifie pas l'état logique.
-    public ArrayList<Coup> getCoupsFutur() {
-        return extraireOrdreChronologique(futur);
-    }
-
-    // Draine la pile dans une liste (sommet en tête), puis la recharge à l'identique.
-    // Retourne la liste dans l'ordre chronologique (base de pile = index 0).
     private ArrayList<Coup> extraireOrdreChronologique(Pile<Coup> pile) {
-        // Étape 1 : vider la pile dans une liste temporaire (sommet d'abord)
         ArrayList<Coup> inversee = new ArrayList<>();
-        while (!pile.estVide()) {
-            inversee.add(pile.depiler());
-        }
-        // Étape 2 : remettre dans la pile (restitue l'ordre original)
-        for (int i = inversee.size() - 1; i >= 0; i--) {
-            pile.empiler(inversee.get(i));
-        }
-        // Étape 3 : inverser la liste pour avoir l'ordre chronologique (base = index 0)
+        while (!pile.estVide()) inversee.add(pile.depiler());
+        for (int i = inversee.size() - 1; i >= 0; i--) pile.empiler(inversee.get(i));
         ArrayList<Coup> chrono = new ArrayList<>(inversee.size());
-        for (int i = inversee.size() - 1; i >= 0; i--) {
-            chrono.add(inversee.get(i));
-        }
+        for (int i = inversee.size() - 1; i >= 0; i--) chrono.add(inversee.get(i));
         return chrono;
     }
 
-    // Reconstruit les piles à partir de listes ordonnées (utilisé au chargement).
-    // passeChrono : du plus ancien au plus récent.
-    // futurChrono : du prochain redo au plus lointain.
     public void restaurer(ArrayList<Coup> passeChrono, ArrayList<Coup> futurChrono) {
         passe.videPile();
         futur.videPile();
-        for (Coup c : passeChrono) {
-            passe.empiler(c);
-        }
-        for (Coup c : futurChrono) {
-            futur.empiler(c);
-        }
+        for (Coup c : passeChrono) passe.empiler(c);
+        for (Coup c : futurChrono) futur.empiler(c);
     }
 
-    // Getters
     public boolean peutAnnuler() { return !passe.estVide(); }
     public boolean peutRefaire() { return !futur.estVide(); }
 }

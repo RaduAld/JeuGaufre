@@ -40,7 +40,7 @@ public class ControleurMediateur implements CollecteurEvenements {
 
     void joue(Coup cp) {
         if (cp != null) {
-            jeu.joue(cp.getI(), cp.getJ());
+            jeu.joue(cp.getL(), cp.getC());
             testFin();
         } else {
             Configuration.alerte("Coup null fourni, probablement un bug dans l'IA");
