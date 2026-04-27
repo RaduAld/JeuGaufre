@@ -25,23 +25,29 @@ public class InterfaceGraphique implements Runnable{
     @Override
     public void run(){
         frame = new JFrame("Gauffre");
-        frame.setSize(800, 400); 
-        //Box droite = createVerticalBox();
+        frame.setSize(800, 400);
+
         JPanel droite = new JPanel();
         droite.setLayout(new BoxLayout(droite,BoxLayout.Y_AXIS));
         droite.setBorder(new EmptyBorder(50,50,50,50));
         JPanel gameContainer = new JPanel(new BorderLayout());
         gameContainer.setBorder(new EmptyBorder(50,50,50,50));
+
         gauf = new Gaufre(jeu);
+
         gameContainer.add(gauf, BorderLayout.CENTER);
         joueur = createJLabel("joueur en cours: 1");
+        gameOver = createJLabel("Game Over. Joueur 2 a gagne");
+        gameOver.setForeground(new Color(131, 11, 11));
+        gameOver.setVisible(false);
         annuler = createToggleButton("annuler");
         rejouer = createToggleButton("rejouer");
         sauvegarder= createJButton("sauvegarder");
         restaurer=createJButton("restaurer");
         nouvellePartie=createJButton("nouvelle partie");
         droite.add(Box.createGlue());
-        droite.add(joueur,BorderLayout.CENTER);
+        droite.add(joueur);
+        droite.add(gameOver);
         droite.add(Box.createVerticalStrut(40));
         droite.add(annuler);
         droite.add(Box.createVerticalStrut(10));
@@ -55,6 +61,7 @@ public class InterfaceGraphique implements Runnable{
         droite.add(Box.createGlue());
         droite.setBackground(new Color(180, 125, 107));
         gameContainer.setBackground(new Color(41, 16, 7));
+
         frame.add(gameContainer);
         frame.add(droite,BorderLayout.EAST);
         frame.setVisible(true);
