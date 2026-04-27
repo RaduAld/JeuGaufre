@@ -28,13 +28,8 @@ public class Gaufre extends JComponent{
     public void paintComponent(Graphics g){
         Graphics2D drawable = (Graphics2D) g;
         super.paintComponent(g); //effacer tout
-        int l = jeu.getLignes();
-        int c = jeu.getColonnes();
-        int width = getWidth()/c;
-        int height = getHeight()/l;
-        //pour avoir des carres
-        width = Math.min(width,height);
-        height = width;
+        int width = longueurCase();
+        int height = width;
         //dessiner la gaufre
         for(int i = 0;i<l;i++){
             for(int j=0;j<c;j++){
@@ -47,4 +42,13 @@ public class Gaufre extends JComponent{
         }
         dessinePoison(drawable,width,height);
     }
+    public int longueurCase(){
+        int l = jeu.getLignes();
+        int c = jeu.getColonnes();
+        int width = getWidth()/c;
+        int height = getHeight()/l;
+        width = Math.min(width,height);
+        return width;
+    }
+
 }
