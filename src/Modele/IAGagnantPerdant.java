@@ -9,7 +9,7 @@ public class IAGagnantPerdant extends IA{
 
     @Override
     public Coup joue(){
-        List<boolean[]> possible_coupes = Jeu.get_children(jeu.getGrille());
+        List<boolean[]> possible_coupes = Jeu.get_children(jeu.getGrille(),  jeu.getLignes(), jeu.getColonnes());
         if (possible_coupes.size() > 1){
             for(boolean[] state : possible_coupes){
                 if (Jeu.compteCasesRestantes(state, jeu.getLignes()) == 1){

@@ -445,17 +445,15 @@ public class Jeu extends Observable implements Cloneable {
         return result;
     }
 
-    public static List<boolean[]> get_children(boolean[] configuration) {
+    //bit permutation didn't enumerate all possible moves, so i just iterate over every remaining case and use applyMove to generate the right configuration each time
+    public static List<boolean[]> get_children(boolean[] configuration, int lignes, int colonnes) {
         List<boolean[]> children = new ArrayList<>();
-        for (int i = 0; i < configuration.length; i++) {
-            if (configuration[i]) {
-                for (int j = i + 1; j < configuration.length; j++) {
-                    if (!configuration[j]) {
-                        boolean[] configPermutation = copy(configuration);
-                        configPermutation[i] = false;
-                        configPermutation[j] = true;
-                        children.add(configPermutation);
-                    }
+        for (int l = 0; l < lignes; l++) {
+            for (int c = 0; c < colonnes; c++) {
+                if (GrilleHelper.estPresente(configuration, l, c, lignes)) {
+                    boolean[] child = copy(configuration);
+                    GrilleHelper.applyMove(child, l, c, lignes, colonnes);
+                    children.add(child);
                 }
             }
         }
