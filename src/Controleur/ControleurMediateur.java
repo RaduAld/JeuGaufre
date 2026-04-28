@@ -79,7 +79,7 @@ void restaurer() {
 
     private void testFin() {
             if (jeu.jeuTermine()){
-                int gagnant = (jeu.getJoueur() + 1) % 2;
+                int gagnant = jeu.getJoueur();
                 Configuration.info("Partie finie ! Le vainqueur est: : "+ gagnant);
             }
     }
