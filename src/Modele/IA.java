@@ -31,12 +31,12 @@ public abstract class IA {
         return resultat;
     }
 
-    public final Pile<Coup> elaboreCoups() {
+    public Coup elaboreCoup() {
         //grille = jeu.getGrille().clone();
         return joue();
     }
 
-    Pile<Coup> joue() {
+    Coup joue() {
         return null;
     }
 }

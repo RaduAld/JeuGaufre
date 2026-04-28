@@ -9,7 +9,7 @@ import Modele.Pile;
 
 class AnimationJeuAutomatique extends Animation {
     IA joueur;
-    Pile<Coup> enAttente;
+    Coup enAttente = null;
 
     AnimationJeuAutomatique(int lenteur, IA j, ControleurMediateur c) {
         super(lenteur, c);
@@ -19,11 +19,11 @@ class AnimationJeuAutomatique extends Animation {
 
     @Override
     public void miseAJour() {
-        if ((enAttente == null) || enAttente.estVide())
-            enAttente = joueur.elaboreCoups();
-        if ((enAttente == null) || enAttente.estVide())
+        if ((enAttente == null))
+            enAttente = joueur.elaboreCoup();
+        if ((enAttente == null))
             Configuration.erreur("Bug : l'IA n'a joué aucun coup");
         else
-            control.joue(enAttente.depiler());
+            control.joue(enAttente);
     }
 }

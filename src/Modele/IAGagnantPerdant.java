@@ -1,5 +1,5 @@
 package Modele;
 
-public class IAGagnantPerdant {
+public class IAGagnantPerdant extends IA{
 
 }

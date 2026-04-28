@@ -14,11 +14,10 @@ public class MainIA {
         while (!jeu.jeuTermine() && nbTours < 50) {
             int joueurCourant = jeu.getJoueur();
             System.out.println("tour du joueur : " + joueurCourant);
-            Pile<Coup> coupIA = ias[joueurCourant].elaboreCoups();
-            if (coupIA != null && !coupIA.estVide()) {
-                Coup coupAJouer = coupIA.depiler();
-                System.out.println("coup joué : " + coupAJouer.getL() + " " + coupAJouer.getC());
-                jeu.joue(coupAJouer.getL(), coupAJouer.getC());
+            Coup coupIA = ias[joueurCourant].elaboreCoup();
+            if (coupIA != null) {
+                System.out.println("coup joué : " + coupIA.getL() + " " + coupIA.getC());
+                jeu.joue(coupIA.getL(), coupIA.getC());
 
             } else {// ??? aucun coup généré
                 System.out.println("aucun coup genere ??");
