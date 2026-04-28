@@ -8,9 +8,7 @@ import static org.junit.Assert.*;
 /**
  * Tests unitaires pour l'Historique (undo/redo) du Jeu de Gaufre.
  *
- * La grille est boolean[M+N], source unique de vérité.
- * Undo : restaure les bits grille[0..savedSegment.length-1].
- * Redo : ré-applique le coup (min-cap) sur les bits.
+ * Sémantique : joue(l,c) cape hauteur(i) pour i >= l (lignes sous la cliquée).
  */
 public class HistoriqueTest {
 
@@ -18,172 +16,143 @@ public class HistoriqueTest {
     public void testInitialisationJeu() {
         Jeu jeu = new Jeu(3, 4, 0);
         boolean[] g = jeu.getGrille();
-        assertEquals("Lignes = 3",        3, jeu.getLignes());
-        assertEquals("Colonnes = 4",      4, jeu.getColonnes());
-        assertEquals("Taille grille = 7", 7, g.length);
+        assertEquals(3, jeu.getLignes());
+        assertEquals(4, jeu.getColonnes());
+        assertEquals(7, g.length);
         // Grille pleine : [F,F,F,F,T,T,T]
         assertFalse("g[0]=false", g[0]);
         assertFalse("g[3]=false", g[3]);
         assertTrue("g[4]=true",   g[4]);
         assertTrue("g[6]=true",   g[6]);
-        assertEquals("Joueur = 0",    0, jeu.getJoueur());
-        assertEquals("hauteur(0) = 4", 4, jeu.hauteur(0));
-        assertEquals("hauteur(2) = 4", 4, jeu.hauteur(2));
+        assertEquals(0, jeu.getJoueur());
+        assertEquals(4, jeu.hauteur(0));
+        assertEquals(4, jeu.hauteur(2));
     }
 
     @Test
-    public void testCoupValideMetAJourGrilleEtJoueur() {
+    public void testCoupValide_l1_c2() {
         Jeu jeu = new Jeu(3, 4, 0);
-        // joue(1,2) : hauteur[0..1] = min(4,2) = 2 ; ligne 2 inchangée
-        assertTrue("Coup (1,2) valide", jeu.joue(1, 2));
-        assertEquals("Joueur = 1",        1, jeu.getJoueur());
-        assertEquals("hauteur(0) = 2",    2, jeu.hauteur(0));
-        assertEquals("hauteur(1) = 2",    2, jeu.hauteur(1));
-        assertEquals("hauteur(2) = 4",    4, jeu.hauteur(2));
-        assertTrue("(1,0) présente",  jeu.estPresente(1, 0));
-        assertTrue("(1,1) présente",  jeu.estPresente(1, 1));
-        assertTrue("(2,3) présente",  jeu.estPresente(2, 3));
+        // joue(1,2) : lignes 1 et 2 capées à 2 ; ligne 0 inchangée
+        assertTrue(jeu.joue(1, 2));
+        assertEquals("joueur=1",     1, jeu.getJoueur());
+        assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
+        assertEquals("hauteur(1)=2", 2, jeu.hauteur(1));
+        assertEquals("hauteur(2)=2", 2, jeu.hauteur(2));
+        assertTrue("(0,3) présente",  jeu.estPresente(0, 3));
         assertFalse("(1,2) vide",     jeu.estPresente(1, 2));
-        assertFalse("(0,3) vide",     jeu.estPresente(0, 3));
+        assertFalse("(2,3) vide",     jeu.estPresente(2, 3));
     }
 
     @Test
-    public void testCoupInvalideNeModifiePasEtat() {
+    public void testCoupInvalide() {
         Jeu jeu = new Jeu(3, 4, 0);
-        assertFalse("Coup hors grille refusé", jeu.joue(4, 1));
-        assertEquals("Joueur = 0",        0, jeu.getJoueur());
-        assertEquals("hauteur(0) = 4",    4, jeu.hauteur(0));
-        assertEquals("hauteur(2) = 4",    4, jeu.hauteur(2));
-        boolean[] g = jeu.getGrille();
-        assertFalse("g[0]=false", g[0]);
-        assertFalse("g[3]=false", g[3]);
-        assertTrue("g[4]=true",   g[4]);
-        assertTrue("g[6]=true",   g[6]);
+        assertFalse(jeu.joue(4, 1));
+        assertEquals(0, jeu.getJoueur());
+        assertEquals(4, jeu.hauteur(0));
+        assertEquals(4, jeu.hauteur(2));
     }
 
     @Test
     public void testAnnuleRestaureEtatPrecedent() {
         Jeu jeu = new Jeu(3, 4, 0);
+        boolean[] avant = jeu.getGrille();
         jeu.joue(1, 2);
-        assertTrue("Annulation possible", jeu.peutAnnuler());
+        assertTrue(jeu.peutAnnuler());
         jeu.annule();
-        assertEquals("Joueur = 0",       0, jeu.getJoueur());
-        assertEquals("hauteur(0) = 4",   4, jeu.hauteur(0));
-        assertEquals("hauteur(1) = 4",   4, jeu.hauteur(1));
-        assertEquals("hauteur(2) = 4",   4, jeu.hauteur(2));
-        assertFalse("Second undo impossible", jeu.peutAnnuler());
+        assertEquals("joueur=0",     0, jeu.getJoueur());
+        assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
+        assertEquals("hauteur(1)=4", 4, jeu.hauteur(1));
+        assertEquals("hauteur(2)=4", 4, jeu.hauteur(2));
+        assertArrayEquals("bits restaurés à l'identique", avant, jeu.getGrille());
+        assertFalse(jeu.peutAnnuler());
     }
 
     @Test
-    public void testAnnuleRestaureLesExactsBits() {
+    public void testAnnuleSansHistorique() {
         Jeu jeu = new Jeu(3, 4, 0);
-        boolean[] grilleInitiale = jeu.getGrille();
-        jeu.joue(1, 2);
-        jeu.annule();
-        assertArrayEquals("Bits restaurés à l'identique",
-                grilleInitiale, jeu.getGrille());
-    }
-
-    @Test
-    public void testAnnuleSansHistoriqueNeCassePasLEtat() {
-        Jeu jeu = new Jeu(3, 4, 0);
-        assertFalse("Undo sans coup impossible", jeu.peutAnnuler());
-        assertEquals("Joueur = 0",     0, jeu.getJoueur());
-        assertEquals("hauteur(0) = 4", 4, jeu.hauteur(0));
-        assertEquals("hauteur(2) = 4", 4, jeu.hauteur(2));
+        assertFalse(jeu.peutAnnuler());
+        assertEquals(0, jeu.getJoueur());
+        assertEquals(4, jeu.hauteur(0));
     }
 
     @Test
     public void testRefaisRejoueLeCoupAnnule() {
         Jeu jeu = new Jeu(3, 4, 0);
         jeu.joue(1, 2);
+        boolean[] apres = jeu.getGrille();
         jeu.annule();
-        assertTrue("Redo possible", jeu.peutRefaire());
+        assertTrue(jeu.peutRefaire());
         jeu.refais();
-        assertEquals("Joueur = 1",       1, jeu.getJoueur());
-        assertEquals("hauteur(0) = 2",   2, jeu.hauteur(0));
-        assertEquals("hauteur(1) = 2",   2, jeu.hauteur(1));
-        assertEquals("hauteur(2) = 4",   4, jeu.hauteur(2));
-        assertFalse("Second redo impossible", jeu.peutRefaire());
+        assertEquals("joueur=1",     1, jeu.getJoueur());
+        assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
+        assertEquals("hauteur(1)=2", 2, jeu.hauteur(1));
+        assertEquals("hauteur(2)=2", 2, jeu.hauteur(2));
+        assertArrayEquals("bits identiques après redo", apres, jeu.getGrille());
+        assertFalse(jeu.peutRefaire());
     }
 
     @Test
-    public void testRefaisRestaureLesExactsBits() {
-        Jeu jeu = new Jeu(3, 4, 0);
-        jeu.joue(1, 2);
-        boolean[] grilleApresCoup = jeu.getGrille();
-        jeu.annule();
-        jeu.refais();
-        assertArrayEquals("Bits restaurés après redo",
-                grilleApresCoup, jeu.getGrille());
-    }
-
-    @Test
-    public void testRefaisSansFuturNeCassePasLEtat() {
+    public void testRefaisSansFutur() {
         Jeu jeu = new Jeu(3, 4, 0);
         jeu.joue(2, 2);
-        assertFalse("Redo sans futur impossible", jeu.peutRefaire());
-        assertEquals("Joueur = 1",     1, jeu.getJoueur());
-        assertEquals("hauteur(0) = 2", 2, jeu.hauteur(0));
-        assertEquals("hauteur(2) = 2", 2, jeu.hauteur(2));
+        assertFalse(jeu.peutRefaire());
+        assertEquals(1, jeu.getJoueur());
+        assertEquals(4, jeu.hauteur(0));
+        assertEquals(2, jeu.hauteur(2));
     }
 
     @Test
-    public void testNouveauCoupVideLeFutur() {
+    public void testNouveauCoupVideFutur() {
         Jeu jeu = new Jeu(4, 4, 0);
         jeu.joue(1, 1);
         jeu.annule();
-        assertTrue("Nouveau coup valide", jeu.joue(2, 2));
-        assertFalse("Redo impossible après nouveau coup", jeu.peutRefaire());
-        assertEquals("Joueur = 1",       1, jeu.getJoueur());
-        assertEquals("hauteur(0) = 2",   2, jeu.hauteur(0));
-        assertEquals("hauteur(1) = 2",   2, jeu.hauteur(1));
-        assertEquals("hauteur(2) = 2",   2, jeu.hauteur(2));
-        assertEquals("hauteur(3) = 4",   4, jeu.hauteur(3));
+        assertTrue(jeu.joue(2, 2));
+        assertFalse("futur vide après nouveau coup", jeu.peutRefaire());
+        assertEquals("joueur=1",     1, jeu.getJoueur());
+        assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
+        assertEquals("hauteur(1)=4", 4, jeu.hauteur(1));
+        assertEquals("hauteur(2)=2", 2, jeu.hauteur(2));
+        assertEquals("hauteur(3)=2", 2, jeu.hauteur(3));
     }
 
     @Test
-    public void testChaineUndoRedoAvecDeuxCoups() {
+    public void testChaineUndoRedo() {
         Jeu jeu = new Jeu(3, 4, 0);
 
-        // Coup 1 : (2,3) → hauteur = [3,3,3]
+        // Coup 1 : (2,3) → seule ligne 2 capée à 3 → hauteur=[4,4,3]
         assertTrue(jeu.joue(2, 3));
-        assertEquals("Joueur = 1",   1, jeu.getJoueur());
-        assertEquals("hauteur(0)=3", 3, jeu.hauteur(0));
+        assertEquals("joueur=1",     1, jeu.getJoueur());
+        assertEquals("hauteur(2)=3", 3, jeu.hauteur(2));
 
-        // Coup 2 : (1,1) → hauteur[0..1] = min(3,1)=1 → [1,1,3]
+        // Coup 2 : (1,1) → lignes 1 et 2 capées à 1 → hauteur=[4,1,1]
         assertTrue(jeu.joue(1, 1));
-        assertEquals("Joueur = 0",   0, jeu.getJoueur());
-        assertEquals("hauteur(0)=1", 1, jeu.hauteur(0));
-        assertEquals("hauteur(1)=1", 1, jeu.hauteur(1));
-        assertEquals("hauteur(2)=3", 3, jeu.hauteur(2));
-
-        // Undo coup 2 → [3,3,3]
-        jeu.annule();
-        assertEquals("Joueur = 1",   1, jeu.getJoueur());
-        assertEquals("hauteur(0)=3", 3, jeu.hauteur(0));
-        assertEquals("hauteur(1)=3", 3, jeu.hauteur(1));
-        assertEquals("hauteur(2)=3", 3, jeu.hauteur(2));
-
-        // Undo coup 1 → [4,4,4]
-        jeu.annule();
-        assertEquals("Joueur = 0",   0, jeu.getJoueur());
+        assertEquals("joueur=0",     0, jeu.getJoueur());
         assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
-        assertEquals("hauteur(2)=4", 4, jeu.hauteur(2));
-        assertFalse("Plus d'undo", jeu.peutAnnuler());
-
-        // Redo coup 1 → [3,3,3]
-        jeu.refais();
-        assertEquals("Joueur = 1",   1, jeu.getJoueur());
-        assertEquals("hauteur(0)=3", 3, jeu.hauteur(0));
-        assertEquals("hauteur(2)=3", 3, jeu.hauteur(2));
-
-        // Redo coup 2 → [1,1,3]
-        jeu.refais();
-        assertEquals("Joueur = 0",   0, jeu.getJoueur());
-        assertEquals("hauteur(0)=1", 1, jeu.hauteur(0));
         assertEquals("hauteur(1)=1", 1, jeu.hauteur(1));
+        assertEquals("hauteur(2)=1", 1, jeu.hauteur(2));
+
+        // Undo coup 2 → hauteur=[4,4,3]
+        jeu.annule();
+        assertEquals("joueur=1",     1, jeu.getJoueur());
+        assertEquals("hauteur(1)=4", 4, jeu.hauteur(1));
         assertEquals("hauteur(2)=3", 3, jeu.hauteur(2));
-        assertFalse("Plus de redo", jeu.peutRefaire());
+
+        // Undo coup 1 → hauteur=[4,4,4]
+        jeu.annule();
+        assertEquals("joueur=0",     0, jeu.getJoueur());
+        assertEquals("hauteur(2)=4", 4, jeu.hauteur(2));
+        assertFalse(jeu.peutAnnuler());
+
+        // Redo coup 1 → hauteur=[4,4,3]
+        jeu.refais();
+        assertEquals("joueur=1",     1, jeu.getJoueur());
+        assertEquals("hauteur(2)=3", 3, jeu.hauteur(2));
+
+        // Redo coup 2 → hauteur=[4,1,1]
+        jeu.refais();
+        assertEquals("joueur=0",     0, jeu.getJoueur());
+        assertEquals("hauteur(1)=1", 1, jeu.hauteur(1));
+        assertEquals("hauteur(2)=1", 1, jeu.hauteur(2));
+        assertFalse(jeu.peutRefaire());
     }
 }

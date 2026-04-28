@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 /**
- * Modèle du Jeu de Gaufre
+ * Modèle du Jeu de Gaufre.
  *
  * ==========================================================================
  * REPRÉSENTATION — boolean[] grille  (taille M+N, source unique de vérité)
@@ -17,24 +17,32 @@ import java.util.ArrayList;
  *   false (0) → pas droite : avance le compteur de colonnes
  *   true  (1) ↓ pas bas    : termine la ligne courante
  *
- * Décodage : scan gauche→droite, col++ sur false, hauteur[row]=col sur true
+ * Les lignes sont stockées en ordre INVERSE dans le vecteur :
+ *   index interne 0     = ligne de jeu M-1 (bas, la plus large)
+ *   index interne M-1   = ligne de jeu 0   (haut, contient le poison)
+ *
  * Grille pleine M×N : [false×N, true×M]   ex 3×4 : [F,F,F,F,T,T,T]
+ * → w interne = [4,4,4], correspondant aux lignes de jeu 2,1,0
+ * → hauteur(0)=4, hauteur(1)=4, hauteur(2)=4  ✓
  *
- * Coup (l,c) :  hauteur(i) = min(hauteur(i), c)  pour i dans [0..l]
- *   → implémenté par GrilleHelper.applyMove (lire tout / cap / réécrire tout)
+ * Coup (l, c) : supprime les cases (l', c') avec l' >= l ET c' >= c
+ *   → hauteur(i) = min(hauteur(i), c) pour toutes les lignes de jeu i >= l
+ *   → en interne : w[j] = min(w[j], c) pour j in [0 .. M-1-l]
  *
- * Undo : restaure grille[0..savedSegment.length-1] depuis Coup.savedSegment
- * Redo : ré-applique applyMove
+ * Poison = case (0,0).  jeuTermine() ↔ hauteur(0)==0 ↔ w[M-1]==0.
  *
- * Poison = case (0,0)  jeuTermine() ↔ hauteur(0)==0 ↔ grille[0]==true
+ * Undo : restaure grille entière depuis Coup.savedSegment (copie complète).
+ * Redo : ré-applique applyMove.
  *
- * Nombre de configurations : C(M+N, M)
+ * Nombre de configurations : C(M+N, M).
  */
 public class Jeu extends Observable {
 
     private int lignes;
     private int colonnes;
     private int joueur;
+
+    /** Vecteur de M+N bits — source unique de vérité sur l'état de la grille. */
     private boolean[] grille;
 
     private Historique historique;
@@ -58,9 +66,9 @@ public class Jeu extends Observable {
     // Initialisation
     // -------------------------------------------------------------------------
 
-    // Grille pleine : [false×N, true×M]    Ex 3×4 → [F,F,F,F,T,T,T]
+    /** Grille pleine : [false×N, true×M].  Ex 3×4 → [F,F,F,F,T,T,T]. */
     private void initialiserGrille() {
-        for (int k = 0; k < colonnes; k++)             grille[k] = false;
+        for (int k = 0; k < colonnes; k++)                 grille[k] = false;
         for (int k = colonnes; k < lignes + colonnes; k++) grille[k] = true;
     }
 
@@ -73,53 +81,57 @@ public class Jeu extends Observable {
     public int getColonnes() { return colonnes; }
     public Historique getHistorique() { return historique; }
 
-    // Copie défensive du vecteur grille (taille M+N)
+    /** Copie défensive du vecteur grille (taille M+N). */
     public boolean[] getGrille() {
         boolean[] copie = new boolean[grille.length];
         System.arraycopy(grille, 0, copie, 0, grille.length);
         return copie;
     }
 
-    // Nombre de cases présentes dans la ligne l Scan O(M+N)
+    /** Nombre de cases présentes dans la ligne de jeu l. */
     public int hauteur(int l) {
         if (l < 0 || l >= lignes) return 0;
-        return GrilleHelper.hauteur(grille, l);
+        return GrilleHelper.hauteur(grille, l, lignes);
     }
 
     // -------------------------------------------------------------------------
     // Consultation de l'état d'une case
     // -------------------------------------------------------------------------
 
-    // True si la case (l,c) est présente : c < hauteur(l)
+    /** True si la case (l, c) est présente : c < hauteur(l). */
     public boolean estPresente(int l, int c) {
         if (l < 0 || l >= lignes || c < 0 || c >= colonnes) return false;
-        return GrilleHelper.estPresente(grille, l, c);
+        return GrilleHelper.estPresente(grille, l, c, lignes);
     }
 
-    // True si (l,c) est le poison (coin haut-gauche, toujours (0,0))
+    /** True si (l, c) est le poison (coin haut-gauche, toujours (0,0)). */
     public boolean estPoison(int l, int c) { return l == 0 && c == 0; }
 
-    // True si (l,c) est une gaufre (présente et pas le poison)
+    /** True si (l, c) est une gaufre (présente et pas le poison). */
     public boolean estGaufre(int l, int c) { return estPresente(l, c) && !estPoison(l, c); }
 
-    // True si (l,c) a été mangée
+    /** True si (l, c) a été mangée. */
     public boolean estVide(int l, int c) { return !estPresente(l, c); }
 
     // -------------------------------------------------------------------------
     // Logique de jeu
     // -------------------------------------------------------------------------
 
-    // True si le jeu est terminé : hauteur(0)==0, ex grille[0]==true
-    public boolean jeuTermine() { return GrilleHelper.jeuTermine(grille); }
+    /**
+     * True si le jeu est terminé : hauteur(0)==0
+     * (la ligne du haut, qui contient le poison, est vide).
+     */
+    public boolean jeuTermine() { return GrilleHelper.jeuTermine(grille, lignes); }
 
-    //Alterne le joueur courant
+    /** Alterne le joueur courant. */
     public void joueurSuivant() { joueur = (joueur + 1) % 2; }
 
     /**
-     * Joue le coup (l,c) si valide
+     * Joue le coup (l, c) si valide.
      *
-     * Validité : jeu non terminé, 0≤l<M, 0≤c<N, case (l,c) présente
-     * Effet    : hauteur(i) = min(hauteur(i), c) pour i dans [0..l]
+     * Validité : jeu non terminé, 0≤l<M, 0≤c<N, case (l,c) présente.
+     * Effet    : supprime toutes les cases (l', c') avec l'>=l ET c'>=c.
+     *            → hauteur(i) = min(hauteur(i), c) pour i in [l..M-1].
      *
      * @return true si le coup a été accepté et joué
      */
@@ -129,8 +141,8 @@ public class Jeu extends Observable {
         if (c < 0 || c >= colonnes)     return false;
         if (!estPresente(l, c))         return false;
 
-        // Sauvegarder grille[0..pos_r] avant modification (pour undo)
-        boolean[] savedSegment = GrilleHelper.saveSegment(grille, l);
+        // Sauvegarder tout le vecteur grille avant modification (pour undo)
+        boolean[] savedSegment = GrilleHelper.saveSegment(grille);
 
         // Appliquer le coup : lire toutes les largeurs, cap, réécrire
         GrilleHelper.applyMove(grille, l, c, lignes, colonnes);
@@ -160,10 +172,9 @@ public class Jeu extends Observable {
     public boolean peutAnnuler() { return historique.peutAnnuler(); }
     public boolean peutRefaire() { return historique.peutRefaire(); }
 
-    /*
-     * Annule le dernier coup
-     * Restaure grille[0..savedSegment.length-1] depuis la sauvegarde
-     * Les bits au-delà du segment (lignes l+1..M-1) n'ont jamais changé
+    /**
+     * Annule le dernier coup : restaure l'intégralité du vecteur grille
+     * depuis la copie stockée dans Coup.savedSegment.
      */
     public Coup annule() {
         Coup c = historique.annule(grille);
@@ -171,9 +182,8 @@ public class Jeu extends Observable {
         return c;
     }
 
-    /*
-     * Rejoue le coup suivant
-     * Ré-applique le coup via GrilleHelper.applyMove
+    /**
+     * Rejoue le coup suivant : ré-applique son effet via GrilleHelper.applyMove.
      */
     public Coup refais() {
         Coup c = historique.refais(grille, lignes, colonnes);
@@ -207,18 +217,18 @@ public class Jeu extends Observable {
             bw.write(sb.toString()); bw.newLine();
             ArrayList<Coup> passe = historique.getCoupsPasse();
             bw.write(String.valueOf(passe.size())); bw.newLine();
-            for (Coup c : passe) { bw.write(encoderCoup(c)); bw.newLine(); }
+            for (Coup cp : passe) { bw.write(encoderCoup(cp)); bw.newLine(); }
             ArrayList<Coup> futur = historique.getCoupsFutur();
             bw.write(String.valueOf(futur.size())); bw.newLine();
-            for (Coup c : futur) { bw.write(encoderCoup(c)); bw.newLine(); }
+            for (Coup cp : futur) { bw.write(encoderCoup(cp)); bw.newLine(); }
         }
         metAJour();
     }
 
-    private String encoderCoup(Coup c) {
+    private String encoderCoup(Coup cp) {
         StringBuilder sb = new StringBuilder();
-        sb.append(c.getL()).append(' ').append(c.getC());
-        for (boolean b : c.getSavedSegment()) sb.append(' ').append(b ? '1' : '0');
+        sb.append(cp.getL()).append(' ').append(cp.getC());
+        for (boolean b : cp.getSavedSegment()) sb.append(' ').append(b ? '1' : '0');
         return sb.toString();
     }
 

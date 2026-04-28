@@ -3,14 +3,10 @@ package Modele;
 import java.util.ArrayList;
 
 /**
- * Historique des coups du Jeu de Gaufre
+ * Historique des coups du Jeu de Gaufre.
  *
- * Deux piles :
- *   passe  — coups joués (sommet = dernier coup)
- *   futur  — coups annulés prêts à être refaits (sommet = prochain redo)
- *
- * Undo : restaure grille[0..savedSegment.length-1] depuis la sauvegarde
- * Redo : ré-applique le coup via GrilleHelper.applyMove (lire/modifier/réécrire)
+ * Undo : restaure la copie complète du vecteur grille stockée dans Coup.
+ * Redo : ré-applique GrilleHelper.applyMove sur la grille courante.
  */
 public class Historique {
 
@@ -27,9 +23,7 @@ public class Historique {
         futur.videPile();
     }
 
-    /**
-     * Annule le dernier coup : restaure grille[0..savedSegment.length-1]
-     */
+    /** Restaure le vecteur grille complet depuis la sauvegarde. */
     Coup annule(boolean[] grille) {
         if (passe.estVide()) {
             System.out.println("Impossible d'annuler : aucun coup dans le passé.");
@@ -42,13 +36,7 @@ public class Historique {
         return c;
     }
 
-    /**
-     * Rejoue le coup suivant : ré-applique son effet via GrilleHelper.applyMove
-     *
-     * @param grille   vecteur de bits de Jeu, modifié en place
-     * @param lignes   M — nécessaire pour lire toutes les largeurs
-     * @param colonnes N — nécessaire pour réécrire toute la grille
-     */
+    /** Ré-applique le coup sur la grille courante. */
     Coup refais(boolean[] grille, int lignes, int colonnes) {
         if (futur.estVide()) {
             System.out.println("Impossible de refaire : aucun coup dans le futur.");
@@ -59,10 +47,6 @@ public class Historique {
         passe.empiler(c);
         return c;
     }
-
-    // -------------------------------------------------------------------------
-    // Sauvegarde / Chargement
-    // -------------------------------------------------------------------------
 
     public ArrayList<Coup> getCoupsPasse() { return extraireOrdreChronologique(passe); }
     public ArrayList<Coup> getCoupsFutur() { return extraireOrdreChronologique(futur); }
