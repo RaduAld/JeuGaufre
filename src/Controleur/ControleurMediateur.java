@@ -41,6 +41,7 @@ public class ControleurMediateur implements CollecteurEvenements {
     void joue(Coup cp) {
         if (cp != null) {
             jeu.joue(cp.getL(), cp.getC());
+            animationIA = null;
             testFin();
         } else {
             Configuration.alerte("Coup null fourni, probablement un bug dans l'IA");
@@ -95,12 +96,14 @@ void restaurer() {
             if(joueursAutomatiques[1] == null){
                 joueursAutomatiques[1] = IA.nouvelle(jeu);
             }
-            Configuration.info("Joueur vs IA");
+             animationIA = null;
+             Configuration.info("Joueur vs IA");
         }
         else{
             //on est deja dans le cas où c'est une IA, on la FLIP vers un joueur
-            typeJoueur[1] = 0;
-            Configuration.info("Joueur vs Joueur");
+             typeJoueur[1] = 0;
+             animationIA = null; 
+             Configuration.info("Joueur vs Joueur");
         }
     }
 
@@ -139,6 +142,13 @@ void restaurer() {
             case "Nouvelle":
                 nouvellePartie();
                 break;
+           case "JoueurVsJoueur":
+                typeJoueur[0] = 0;
+                typeJoueur[1] = 0;
+                animationIA = null;
+                joueursAutomatiques[1] = null;
+                Configuration.info("Joueur vs Joueur");
+                break;
             case "Full":
                 // a implementer plus tard
                 //vue.toggleFullscreen();
@@ -152,21 +162,18 @@ void restaurer() {
     public void ajouteInterfaceUtilisateur(InterfaceUtilisateur v) {
         vue = v;
     }
-
-    @Override
-    public void tictac() {
-
-        if (!jeu.jeuTermine() && typeJoueur[jeu.getJoueur()] == 1)  {
-            //c le tour de l'ia
-            //MAIS on n'est pas sur d'avoir initialise ses parametres a l'instant t
-            if(animationIA == null || animationIA.joueur != joueursAutomatiques[jeu.getJoueur()]){
-                    lenteurJeuAutomatique = Configuration.lisInt("LenteurJeuAutomatique");
-                    animationIA = new AnimationJeuAutomatique(lenteurJeuAutomatique, joueursAutomatiques[jeu.getJoueur()], this);
-            }
-            animationIA.tictac();
-            //test de fin à implementer ?
+@Override
+public void tictac() {
+    if (!jeu.jeuTermine() && typeJoueur[jeu.getJoueur()] == 1) {
+        if (animationIA == null) {
+            lenteurJeuAutomatique = Configuration.lisInt("LenteurJeuAutomatique");
+            animationIA = new AnimationJeuAutomatique(
+                lenteurJeuAutomatique,
+                joueursAutomatiques[jeu.getJoueur()],
+                this
+            );
         }
+        animationIA.tictac();
     }
-
-
+}
 }

@@ -75,9 +75,9 @@ public class Main {
         //             + " a mangé le poison.");
         //     System.out.println("Joueur " + gagnant + " gagne !");
         // }
-//        System.out.println("╔══════════════════════════════════╗");
-//        System.out.println("║       JEU DE GAUFRE  3×4        ║");
-//        System.out.println("╚══════════════════════════════════╝");
+//        System.out.println("");
+//        System.out.println("       JEU DE GAUFRE  3×4        ");
+//        System.out.println("");
 //
 //        Jeu jeu = new Jeu(3, 4, 0);
 //

@@ -24,6 +24,10 @@ class AnimationJeuAutomatique extends Animation {
         if ((enAttente == null))
             Configuration.erreur("Bug : l'IA n'a joué aucun coup");
         else
-            control.joue(enAttente);
+        {
+            Coup cp = enAttente;
+            enAttente = null; 
+            control.joue(cp);
+        }
     }
 }

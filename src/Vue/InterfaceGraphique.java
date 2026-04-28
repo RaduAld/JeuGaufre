@@ -94,8 +94,9 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
 
         jeu.ajouteObservateur(this);
         
-        //Timer chrono = new Timer(16,)
-      
+        Timer timer = new Timer(30, e -> control.tictac());
+        timer.start();
+
         //mise en place interface
         frame.add(gameContainer);
         frame.add(droite,BorderLayout.EAST);
