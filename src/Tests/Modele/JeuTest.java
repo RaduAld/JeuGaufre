@@ -30,20 +30,20 @@ public class JeuTest {
 
     @Test
     public void testCoupStockeCoordonnees() {
-        boolean[] seg = new boolean[7]; // taille quelconque pour le test
-        Coup c = new Coup(1, 2, seg);
+        boolean[] grille = new boolean[7];
+        Coup c = new Coup(1, 2, grille);
         assertEquals("l doit être stocké", 1, c.getL());
         assertEquals("c doit être stocké", 2, c.getC());
     }
 
     @Test
-    public void testCoupStockeSavedSegment() {
-        boolean[] seg = {false, false, false, false, true, true, true};
-        Coup c = new Coup(0, 1, seg);
-        assertNotNull(c.getSavedSegment());
-        assertEquals(7, c.getSavedSegment().length);
-        assertFalse(c.getSavedSegment()[0]);
-        assertTrue(c.getSavedSegment()[4]);
+    public void testCoupStockeSavedGrille() {
+        boolean[] grille = {false, false, false, false, true, true, true};
+        Coup c = new Coup(0, 1, grille);
+        assertNotNull(c.getSavedGrille());
+        assertEquals(7, c.getSavedGrille().length);
+        assertFalse(c.getSavedGrille()[0]);
+        assertTrue(c.getSavedGrille()[4]);
     }
 
     // =========================================================================

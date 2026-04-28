@@ -31,7 +31,7 @@ import java.util.ArrayList;
  *
  * Poison = case (0,0).  jeuTermine() ↔ hauteur(0)==0 ↔ w[M-1]==0.
  *
- * Undo : restaure grille entière depuis Coup.savedSegment (copie complète).
+ * Undo : restaure grille entière depuis Coup.savedGrille (copie complète).
  * Redo : ré-applique applyMove.
  *
  * Nombre de configurations : C(M+N, M).
@@ -141,13 +141,13 @@ public class Jeu extends Observable {
         if (c < 0 || c >= colonnes)     return false;
         if (!estPresente(l, c))         return false;
 
-        // Sauvegarder tout le vecteur grille avant modification (pour undo)
-        boolean[] savedSegment = GrilleHelper.saveSegment(grille);
+        // Copie complète du vecteur grille avant modification (pour undo)
+        boolean[] savedGrille = GrilleHelper.saveGrille(grille);
 
         // Appliquer le coup : lire toutes les largeurs, cap, réécrire
         GrilleHelper.applyMove(grille, l, c, lignes, colonnes);
 
-        historique.joue(new Coup(l, c, savedSegment));
+        historique.joue(new Coup(l, c, savedGrille));
         joueurSuivant();
         metAJour();
         return true;
@@ -174,7 +174,7 @@ public class Jeu extends Observable {
 
     /**
      * Annule le dernier coup : restaure l'intégralité du vecteur grille
-     * depuis la copie stockée dans Coup.savedSegment.
+     * depuis la copie stockée dans Coup.savedGrille.
      */
     public Coup annule() {
         Coup c = historique.annule(grille);
@@ -228,7 +228,7 @@ public class Jeu extends Observable {
     private String encoderCoup(Coup cp) {
         StringBuilder sb = new StringBuilder();
         sb.append(cp.getL()).append(' ').append(cp.getC());
-        for (boolean b : cp.getSavedSegment()) sb.append(' ').append(b ? '1' : '0');
+        for (boolean b : cp.getSavedGrille()) sb.append(' ').append(b ? '1' : '0');
         return sb.toString();
     }
 

@@ -30,8 +30,8 @@ public class Historique {
             return null;
         }
         Coup c = passe.depiler();
-        boolean[] seg = c.getSavedSegment();
-        System.arraycopy(seg, 0, grille, 0, seg.length);
+        boolean[] saved = c.getSavedGrille();
+        System.arraycopy(saved, 0, grille, 0, saved.length);
         futur.empiler(c);
         return c;
     }

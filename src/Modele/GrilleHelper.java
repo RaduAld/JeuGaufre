@@ -1,15 +1,15 @@
 package Modele;
 
 /**
- * Utilitaires purs sur le vecteur de bits grille (boolean[M+N])
+ * Utilitaires purs sur le vecteur de bits grille (boolean[M+N]).
  *
  * ==========================================================================
  * CONVENTION D'ENCODAGE
  * ==========================================================================
  *
- * Le poison est en haut-gauche (ligne 0, col 0)
+ * Le poison est en haut-gauche (ligne 0, col 0).
  * Manger (l, c) supprime toutes les cases (l', c') avec l' >= l ET c' >= c
- * (vers la droite ET vers le bas)
+ * (vers la droite ET vers le bas).
  *
  * L'invariant staircase est donc NON-CROISSANT de haut en bas :
  *   hauteur(0) >= hauteur(1) >= ... >= hauteur(M-1)
@@ -32,7 +32,7 @@ package Modele;
  * pas le seul true restant au dernier rang — plus simplement :
  *   jeuTermine() <=> w[M-1] == 0 <=> le dernier true dans grille est précédé
  *   immédiatement par aucun false, i.e. grille[M+N-M] == true ...
- *   En pratique : hauteur(0) == 0, ce qu'on calcule via w[M-1]
+ *   En pratique : hauteur(0) == 0, ce qu'on calcule via w[M-1].
  *
  * ==========================================================================
  */
@@ -45,9 +45,9 @@ class GrilleHelper {
     // -------------------------------------------------------------------------
 
     /**
-     * Décode le vecteur grille en tableau w[] de taille M
-     * w[0] = largeur ligne de jeu M-1 (bas), w[M-1] = largeur ligne de jeu 0 (haut)
-     * Un seul scan O(M+N)
+     * Décode le vecteur grille en tableau w[] de taille M.
+     * w[0] = largeur ligne de jeu M-1 (bas), w[M-1] = largeur ligne de jeu 0 (haut).
+     * Un seul scan O(M+N).
      */
     static int[] toutesLargeurs(boolean[] grille, int lignes) {
         int[] w       = new int[lignes];
@@ -70,25 +70,25 @@ class GrilleHelper {
     // -------------------------------------------------------------------------
 
     /**
-     * Largeur de la ligne de JEU l (cases présentes depuis col 0)
-     * Ligne de jeu l  →  index interne  M-1-l
+     * Largeur de la ligne de JEU l (cases présentes depuis col 0).
+     * Ligne de jeu l  →  index interne  M-1-l.
      */
     static int hauteur(boolean[] grille, int l, int lignes) {
         int[] w = toutesLargeurs(grille, lignes);
         return w[lignes - 1 - l];
     }
 
-    /** True si la case de jeu (l, c) est présente : c < hauteur(l) */
+    /** True si la case de jeu (l, c) est présente : c < hauteur(l). */
     static boolean estPresente(boolean[] grille, int l, int c, int lignes) {
         return c < hauteur(grille, l, lignes);
     }
 
     /**
-     * True si le jeu est terminé : hauteur de la ligne 0 (haut) == 0
-     * Ligne 0 → index interne M-1 → w[M-1] == 0
+     * True si le jeu est terminé : hauteur de la ligne 0 (haut) == 0.
+     * Ligne 0 → index interne M-1 → w[M-1] == 0.
      * Dans le vecteur, w[M-1] est la DERNIÈRE largeur encodée :
-     * le dernier true du vecteur est immédiatement précédé de zéro faux
-     * Plus simplement : on décode et on regarde w[M-1]
+     * le dernier true du vecteur est immédiatement précédé de zéro faux.
+     * Plus simplement : on décode et on regarde w[M-1].
      */
     static boolean jeuTermine(boolean[] grille, int lignes) {
         int[] w = toutesLargeurs(grille, lignes);
@@ -100,14 +100,10 @@ class GrilleHelper {
     // -------------------------------------------------------------------------
 
     /**
-     * Sauvegarde l'intégralité du vecteur grille (copie défensive)
-     *
-     * On sauvegarde tout plutôt qu'un segment partiel, car un coup sur la
-     * ligne de jeu l affecte les index internes 0..M-1-l (les lignes basses
-     * dans l'encodage), ce qui correspond à un préfixe variable du vecteur
-     * Sauvegarder tout garantit un undo parfait sans calcul d'offset
+     * Copie défensive complète du vecteur grille, sauvegardée dans Coup pour undo.
+     * Taille = M+N bits (l'intégralité de l'état courant).
      */
-    static boolean[] saveSegment(boolean[] grille) {
+    static boolean[] saveGrille(boolean[] grille) {
         boolean[] copy = new boolean[grille.length];
         System.arraycopy(grille, 0, copy, 0, grille.length);
         return copy;
@@ -118,7 +114,7 @@ class GrilleHelper {
     // -------------------------------------------------------------------------
 
     /**
-     * Applique le coup (l, c) en coordonnées de JEU sur grille en place
+     * Applique le coup (l, c) en coordonnées de JEU sur grille en place.
      *
      * Effet logique : pour toutes les lignes de jeu l' >= l,
      *   hauteur(l') = min(hauteur(l'), c)
@@ -127,7 +123,7 @@ class GrilleHelper {
      *   lignes de jeu l' in [l .. M-1]  ↔  index internes i in [0 .. M-1-l]
      *   → w[i] = min(w[i], c)  pour i in [0 .. M-1-l]
      *
-     * Algorithme : lire tout / cap / réécrire tout O(M+N)
+     * Algorithme : lire tout / cap / réécrire tout. O(M+N).
      */
     static void applyMove(boolean[] grille, int l, int c,
                           int lignes, int colonnes) {
@@ -148,7 +144,7 @@ class GrilleHelper {
     // -------------------------------------------------------------------------
 
     /**
-     * Encode le tableau de largeurs w[] dans grille en place
+     * Encode le tableau de largeurs w[] (non-décroissant) dans grille en place.
      *
      * Staircase :
      *   Pour chaque i (0..M-1) :
