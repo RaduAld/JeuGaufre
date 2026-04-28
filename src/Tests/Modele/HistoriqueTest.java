@@ -8,7 +8,9 @@ import static org.junit.Assert.*;
 /**
  * Tests unitaires pour l'Historique (undo/redo) du Jeu de Gaufre.
  *
- * Sémantique : joue(l,c) cape hauteur(i) pour i >= l (lignes sous la cliquée).
+ * Convention : true (1) → droite,  false (0) ↓ bas.
+ * Grille pleine M×N : [true×N, false×M]
+ *   Ex. 3×4 : [T,T,T,T,F,F,F]  →  g[0..3]=true, g[4..6]=false
  */
 public class HistoriqueTest {
 
@@ -19,11 +21,11 @@ public class HistoriqueTest {
         assertEquals(3, jeu.getLignes());
         assertEquals(4, jeu.getColonnes());
         assertEquals(7, g.length);
-        // Grille pleine : [F,F,F,F,T,T,T]
-        assertFalse("g[0]=false", g[0]);
-        assertFalse("g[3]=false", g[3]);
-        assertTrue("g[4]=true",   g[4]);
-        assertTrue("g[6]=true",   g[6]);
+        // Grille pleine : [T,T,T,T,F,F,F]
+        assertTrue("g[0]=true",   g[0]);
+        assertTrue("g[3]=true",   g[3]);
+        assertFalse("g[4]=false", g[4]);
+        assertFalse("g[6]=false", g[6]);
         assertEquals(0, jeu.getJoueur());
         assertEquals(4, jeu.hauteur(0));
         assertEquals(4, jeu.hauteur(2));
@@ -50,6 +52,12 @@ public class HistoriqueTest {
         assertEquals(0, jeu.getJoueur());
         assertEquals(4, jeu.hauteur(0));
         assertEquals(4, jeu.hauteur(2));
+        // Grille inchangée : [T,T,T,T,F,F,F]
+        boolean[] g = jeu.getGrille();
+        assertTrue("g[0]=true",   g[0]);
+        assertTrue("g[3]=true",   g[3]);
+        assertFalse("g[4]=false", g[4]);
+        assertFalse("g[6]=false", g[6]);
     }
 
     @Test
@@ -107,7 +115,7 @@ public class HistoriqueTest {
         jeu.joue(1, 1);
         jeu.annule();
         assertTrue(jeu.joue(2, 2));
-        assertFalse("futur vide après nouveau coup", jeu.peutRefaire());
+        assertFalse("futur vide", jeu.peutRefaire());
         assertEquals("joueur=1",     1, jeu.getJoueur());
         assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
         assertEquals("hauteur(1)=4", 4, jeu.hauteur(1));

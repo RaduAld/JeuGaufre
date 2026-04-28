@@ -9,16 +9,16 @@ import static org.junit.Assert.*;
 /**
  * Tests unitaires pour Coup et Jeu (Jeu de Gaufre, poison haut-gauche).
  *
- * Sémantique du coup (l, c) :
- *   Supprime toutes les cases (l', c') avec l' >= l ET c' >= c
- *   → hauteur(i) = min(hauteur(i), c)  pour i dans [l .. M-1]
- *   (lignes SOUS et INCLUANT la ligne cliquée sont capées)
+ * Convention d'encodage (nouvelle) :
+ *   true  (1) → pas droite
+ *   false (0) ↓ pas bas
  *
- * Encodage vecteur (taille M+N) :
- *   Les lignes sont stockées en ordre inverse : index 0 = ligne M-1 (bas).
- *   Grille pleine M×N : [false×N, true×M]
- *   Ex. 3×4 pleine : [F,F,F,F,T,T,T]
- *     → w interne [4,4,4] = lignes de jeu 2,1,0 → hauteur(0)=hauteur(1)=hauteur(2)=4
+ * Grille pleine M×N : [true×N, false×M]
+ *   Ex. 3×4 : [T,T,T,T,F,F,F]  →  g[0..3]=true, g[4..6]=false
+ *
+ * Sémantique du coup (l, c) :
+ *   Supprime les cases (l', c') avec l' >= l ET c' >= c.
+ *   → hauteur(i) = min(hauteur(i), c)  pour i dans [l .. M-1].
  *
  * jeuTermine() ↔ hauteur(0)==0 (ligne du haut vide, poison mangé).
  */
@@ -38,12 +38,13 @@ public class JeuTest {
 
     @Test
     public void testCoupStockeSavedGrille() {
-        boolean[] grille = {false, false, false, false, true, true, true};
+        // Grille pleine 3×4 : [T,T,T,T,F,F,F]
+        boolean[] grille = {true, true, true, true, false, false, false};
         Coup c = new Coup(0, 1, grille);
         assertNotNull(c.getSavedGrille());
         assertEquals(7, c.getSavedGrille().length);
-        assertFalse(c.getSavedGrille()[0]);
-        assertTrue(c.getSavedGrille()[4]);
+        assertTrue("g[0] doit être true",   c.getSavedGrille()[0]);
+        assertFalse("g[4] doit être false",  c.getSavedGrille()[4]);
     }
 
     // =========================================================================
@@ -61,23 +62,39 @@ public class JeuTest {
     @Test
     public void testConstructeurDefautGrillePleine() {
         Jeu jeu = new Jeu(1);
-        // Grille pleine 5×7 : [false×7, true×5]
+        // Grille pleine 5×7 : [true×7, false×5]  →  g[0..6]=true, g[7..11]=false
         boolean[] g = jeu.getGrille();
         assertEquals(1, jeu.getJoueur());
-        for (int k = 0; k < 7;  k++) assertFalse("g[" + k + "] doit être false", g[k]);
-        for (int k = 7; k < 12; k++) assertTrue("g["  + k + "] doit être true",  g[k]);
+        for (int k = 0; k < 7;  k++) assertTrue("g[" + k + "] doit être true",  g[k]);
+        for (int k = 7; k < 12; k++) assertFalse("g[" + k + "] doit être false", g[k]);
+    }
+
+    @Test
+    public void testConstructeurParametresArbitraires() {
+        Jeu jeu = new Jeu(2, 3, 1);
+        // Grille pleine 2×3 : [T,T,T,F,F]
+        boolean[] g = jeu.getGrille();
+        assertEquals(2, jeu.getLignes());
+        assertEquals(3, jeu.getColonnes());
+        assertEquals(5, g.length);
+        assertTrue("g[0]=true",   g[0]);
+        assertTrue("g[1]=true",   g[1]);
+        assertTrue("g[2]=true",   g[2]);
+        assertFalse("g[3]=false", g[3]);
+        assertFalse("g[4]=false", g[4]);
     }
 
     @Test
     public void testConstructeur3x4GrillePleine() {
         Jeu jeu = new Jeu(3, 4, 0);
-        // [F,F,F,F,T,T,T]
+        // [T,T,T,T,F,F,F]
         boolean[] g = jeu.getGrille();
         assertEquals(7, g.length);
-        assertFalse("g[0]=false", g[0]);
-        assertFalse("g[3]=false", g[3]);
-        assertTrue("g[4]=true",   g[4]);
-        assertTrue("g[6]=true",   g[6]);
+        assertTrue("g[0]=true",   g[0]);
+        assertTrue("g[3]=true",   g[3]);
+        assertFalse("g[4]=false", g[4]);
+        assertFalse("g[5]=false", g[5]);
+        assertFalse("g[6]=false", g[6]);
     }
 
     @Test
@@ -137,7 +154,7 @@ public class JeuTest {
     @Test
     public void testJouerSurCaseVide() {
         Jeu jeu = new Jeu(3, 4, 0);
-        jeu.joue(0, 2);   // ligne 0,1,2 → hauteur = min(4,2)=2 pour l>=0 → toutes à 2
+        jeu.joue(0, 2);  // toutes les lignes capées à 2
         int avant = jeu.getJoueur();
         assertFalse("case vide refusée", jeu.joue(0, 3));
         assertEquals(avant, jeu.getJoueur());
@@ -160,16 +177,16 @@ public class JeuTest {
         Jeu jeu = new Jeu(3, 4, 0);
         // joue(1,2) : lignes 1 et 2 capées à 2 ; ligne 0 (haut) inchangée
         assertTrue(jeu.joue(1, 2));
-        assertEquals("joueur = 1",        1, jeu.getJoueur());
-        assertEquals("hauteur(0) = 4",    4, jeu.hauteur(0));  // ligne haut inchangée
-        assertEquals("hauteur(1) = 2",    2, jeu.hauteur(1));
-        assertEquals("hauteur(2) = 2",    2, jeu.hauteur(2));
+        assertEquals("joueur = 1",     1, jeu.getJoueur());
+        assertEquals("hauteur(0) = 4", 4, jeu.hauteur(0));
+        assertEquals("hauteur(1) = 2", 2, jeu.hauteur(1));
+        assertEquals("hauteur(2) = 2", 2, jeu.hauteur(2));
     }
 
     @Test
     public void testCoup_l0_c2_capeToutes() {
         Jeu jeu = new Jeu(3, 4, 0);
-        // joue(0,2) : toutes les lignes (0,1,2) capées à 2
+        // joue(0,2) : toutes les lignes capées à 2
         assertTrue(jeu.joue(0, 2));
         assertEquals("hauteur(0) = 2", 2, jeu.hauteur(0));
         assertEquals("hauteur(1) = 2", 2, jeu.hauteur(1));
@@ -179,7 +196,7 @@ public class JeuTest {
     @Test
     public void testCoup_l2_c3_seulementLigne2() {
         Jeu jeu = new Jeu(3, 4, 0);
-        // joue(2,3) : seule la ligne 2 (bas) est capée à 3 ; lignes 0 et 1 inchangées
+        // joue(2,3) : seule la ligne 2 (bas) est capée à 3
         assertTrue(jeu.joue(2, 3));
         assertEquals("hauteur(0) = 4", 4, jeu.hauteur(0));
         assertEquals("hauteur(1) = 4", 4, jeu.hauteur(1));
@@ -190,10 +207,9 @@ public class JeuTest {
     public void testPresenceApresUnCoup() {
         Jeu jeu = new Jeu(3, 4, 0);
         jeu.joue(1, 2);   // hauteur = [0→4, 1→2, 2→2]
-        // Ligne 0 (haut) inchangée
+        // Ligne 0 inchangée
         assertTrue("(0,3) présente",  jeu.estPresente(0, 3));
         // Lignes 1 et 2 capées à 2
-        assertTrue("(1,0) présente",  jeu.estPresente(1, 0));
         assertTrue("(1,1) présente",  jeu.estPresente(1, 1));
         assertFalse("(1,2) vide",     jeu.estPresente(1, 2));
         assertFalse("(1,3) vide",     jeu.estPresente(1, 3));
@@ -205,7 +221,7 @@ public class JeuTest {
         Jeu jeu = new Jeu(3, 4, 0);
         // joue(0,0) : toutes les lignes capées à 0
         assertTrue(jeu.joue(0, 0));
-        assertTrue("jeu terminé", jeu.jeuTermine());
+        assertTrue("jeu terminé",       jeu.jeuTermine());
         assertEquals("hauteur(0)=0", 0, jeu.hauteur(0));
         assertEquals("hauteur(1)=0", 0, jeu.hauteur(1));
         assertEquals("hauteur(2)=0", 0, jeu.hauteur(2));
@@ -214,7 +230,7 @@ public class JeuTest {
     @Test
     public void testDeuxCoupsSuccessifs() {
         Jeu jeu = new Jeu(3, 4, 0);
-        // Coup 1 : (2,2) → seule ligne 2 capée à 2 → hauteur = [4,4,2]
+        // Coup 1 : (2,2) → seule ligne 2 capée → hauteur = [4,4,2]
         assertTrue(jeu.joue(2, 2));
         assertEquals("joueur=1",     1, jeu.getJoueur());
         assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
@@ -237,37 +253,45 @@ public class JeuTest {
     public void testBitsApresJoue_l2_c3_sur3x4() {
         Jeu jeu = new Jeu(3, 4, 0);
         // joue(2,3) : seule ligne 2 (bas) capée à 3
-        // w interne : [w_ligne2, w_ligne1, w_ligne0] = [3, 4, 4]
-        // Encodage : delta(3-0)=3 faux, vrai, delta(4-3)=1 faux, vrai, delta(4-4)=0 faux, vrai
-        // → [F,F,F,T,F,T,T]
+        // w interne : [w_l2, w_l1, w_l0] = [3, 4, 4]
+        // Encodage :
+        //   i=0 (l=2): 3 vrais, 1 faux
+        //   i=1 (l=1): 1 vrai  (delta=4-3), 1 faux
+        //   i=2 (l=0): 0 vrai  (delta=4-4), 1 faux
+        //   reste    : 0 vrais
+        // → [T,T,T,F,T,F,F]
         jeu.joue(2, 3);
         boolean[] g = jeu.getGrille();
         assertEquals(7, g.length);
-        assertFalse("g[0]=false", g[0]);
-        assertFalse("g[1]=false", g[1]);
-        assertFalse("g[2]=false", g[2]);
-        assertTrue("g[3]=true",   g[3]);
-        assertFalse("g[4]=false", g[4]);
-        assertTrue("g[5]=true",   g[5]);
-        assertTrue("g[6]=true",   g[6]);
+        assertTrue("g[0]=true",   g[0]);
+        assertTrue("g[1]=true",   g[1]);
+        assertTrue("g[2]=true",   g[2]);
+        assertFalse("g[3]=false", g[3]);
+        assertTrue("g[4]=true",   g[4]);
+        assertFalse("g[5]=false", g[5]);
+        assertFalse("g[6]=false", g[6]);
     }
 
     @Test
     public void testBitsApresJoue_l1_c2_sur3x4() {
         Jeu jeu = new Jeu(3, 4, 0);
         // joue(1,2) : lignes 1 et 2 capées à 2 → hauteur = [4,2,2]
-        // w interne : [w_ligne2, w_ligne1, w_ligne0] = [2, 2, 4]
-        // Encodage : 2 faux, vrai, 0 faux, vrai, 2 faux, vrai, 0 faux restants
-        // → [F,F,T,T,F,F,T]
+        // w interne : [w_l2, w_l1, w_l0] = [2, 2, 4]
+        // Encodage :
+        //   i=0 (l=2): 2 vrais, 1 faux
+        //   i=1 (l=1): 0 vrais (delta=0), 1 faux
+        //   i=2 (l=0): 2 vrais (delta=2), 1 faux
+        //   reste    : 0 vrais
+        // → [T,T,F,F,T,T,F]
         jeu.joue(1, 2);
         boolean[] g = jeu.getGrille();
-        assertFalse("g[0]=false", g[0]);
-        assertFalse("g[1]=false", g[1]);
-        assertTrue("g[2]=true",   g[2]);
-        assertTrue("g[3]=true",   g[3]);
-        assertFalse("g[4]=false", g[4]);
-        assertFalse("g[5]=false", g[5]);
-        assertTrue("g[6]=true",   g[6]);
+        assertTrue("g[0]=true",   g[0]);
+        assertTrue("g[1]=true",   g[1]);
+        assertFalse("g[2]=false", g[2]);
+        assertFalse("g[3]=false", g[3]);
+        assertTrue("g[4]=true",   g[4]);
+        assertTrue("g[5]=true",   g[5]);
+        assertFalse("g[6]=false", g[6]);
     }
 
     // =========================================================================
@@ -328,28 +352,24 @@ public class JeuTest {
         assertTrue(jeu.joue(0, 0));
         assertTrue(jeu.jeuTermine());
 
-        // Undo coup 2 → hauteur=[4,4,2,2]
-        jeu.annule();
+        jeu.annule();   // → hauteur=[4,4,2,2]
         assertEquals("joueur=1",     1, jeu.getJoueur());
         assertEquals("hauteur(0)=4", 4, jeu.hauteur(0));
         assertEquals("hauteur(2)=2", 2, jeu.hauteur(2));
         assertFalse(jeu.jeuTermine());
 
-        // Undo coup 1 → hauteur=[4,4,4,4]
-        jeu.annule();
+        jeu.annule();   // → hauteur=[4,4,4,4]
         assertEquals("joueur=0",     0, jeu.getJoueur());
         assertEquals("hauteur(2)=4", 4, jeu.hauteur(2));
         assertEquals("hauteur(3)=4", 4, jeu.hauteur(3));
         assertFalse(jeu.peutAnnuler());
 
-        // Redo coup 1 → hauteur=[4,4,2,2]
-        jeu.refais();
+        jeu.refais();   // → hauteur=[4,4,2,2]
         assertEquals("joueur=1",     1, jeu.getJoueur());
         assertEquals("hauteur(2)=2", 2, jeu.hauteur(2));
         assertEquals("hauteur(3)=2", 2, jeu.hauteur(3));
 
-        // Redo coup 2 → jeu terminé
-        jeu.refais();
+        jeu.refais();   // → jeu terminé
         assertEquals("joueur=0",     0, jeu.getJoueur());
         assertTrue(jeu.jeuTermine());
         assertFalse(jeu.peutRefaire());

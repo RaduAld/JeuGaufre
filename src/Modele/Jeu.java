@@ -14,14 +14,14 @@ import java.util.ArrayList;
  * ==========================================================================
  *
  * Encode le chemin en escalier (staircase path) :
- *   false (0) → pas droite : avance le compteur de colonnes
- *   true  (1) ↓ pas bas    : termine la ligne courante
+ *   true  (1) → pas droite : avance le compteur de colonnes
+ *   false (0) ↓ pas bas    : termine la ligne courante
  *
  * Les lignes sont stockées en ordre INVERSE dans le vecteur :
  *   index interne 0     = ligne de jeu M-1 (bas, la plus large)
  *   index interne M-1   = ligne de jeu 0   (haut, contient le poison)
  *
- * Grille pleine M×N : [false×N, true×M]   ex 3×4 : [F,F,F,F,T,T,T]
+ * Grille pleine M×N : [true×N, false×M]   ex 3×4 : [T,T,T,T,F,F,F]
  * → w interne = [4,4,4], correspondant aux lignes de jeu 2,1,0
  * → hauteur(0)=4, hauteur(1)=4, hauteur(2)=4  ✓
  *
@@ -66,10 +66,10 @@ public class Jeu extends Observable {
     // Initialisation
     // -------------------------------------------------------------------------
 
-    /** Grille pleine : [false×N, true×M].  Ex 3×4 → [F,F,F,F,T,T,T]. */
+    /** Grille pleine : [true×N, false×M].  Ex 3×4 → [T,T,T,T,F,F,F]. */
     private void initialiserGrille() {
-        for (int k = 0; k < colonnes; k++)                 grille[k] = false;
-        for (int k = colonnes; k < lignes + colonnes; k++) grille[k] = true;
+        for (int k = 0; k < colonnes; k++)                 grille[k] = true;
+        for (int k = colonnes; k < lignes + colonnes; k++) grille[k] = false;
     }
 
     // -------------------------------------------------------------------------
