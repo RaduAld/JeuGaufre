@@ -8,7 +8,7 @@ public class IAAleatoire extends IA{
         int k = 0;
         for (int i = 0; i < jeu.getLignes(); i++){
             for (int j = 0; j < jeu.getColonnes(); j++){
-                if (grille[i][j] >0)
+                if (jeu.estPresente(i,j))
                     k++;
             }
         }
@@ -18,7 +18,7 @@ public class IAAleatoire extends IA{
         Pile<Coup> pile = new Pile<>();
         for (int i = 0; i < jeu.getLignes(); i++){
             for (int j = 0; j < jeu.getColonnes(); j++){
-                if (grille[i][j] >0){
+                if (jeu.estPresente(i,j)){
                     if(numCaseAChoisir == val){
                         //je passe quoi comme liste pour Coup ??? null pour l'instant
                         Coup cp =new Coup(i, j, null);
