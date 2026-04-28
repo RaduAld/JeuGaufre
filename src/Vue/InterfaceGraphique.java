@@ -9,17 +9,19 @@ import javax.swing.border.EmptyBorder;
 public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observateur{
     Jeu jeu;
     Gaufre gauf;
-    JLabel gameOver,joueur;
+    JLabel gameOver,joueur, choixjeu;
     JToggleButton annuler,rejouer;
-    JButton sauvegarder,restaurer,nouvellePartie;
+    JButton sauvegarder,restaurer,nouvellePartie, Joueur1_VS_Joueur2, Joueur_Vs_AI;
     CollecteurEvenements control;
     JFrame frame;
+    JPanel gameContainer;
 
     InterfaceGraphique(Jeu j,CollecteurEvenements c){
         jeu = j;
         control = c;
 
     }
+
     public static void demarrer(Jeu j,CollecteurEvenements c){
         InterfaceGraphique vue = new InterfaceGraphique(j,c);
         c.ajouteInterfaceUtilisateur(vue);
@@ -33,18 +35,28 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
         gauf = new Gaufre(jeu);
 
         //creer panel de jeu
-        JPanel gameContainer = new JPanel(new BorderLayout());
+        gameContainer = new JPanel(new BorderLayout());
         gameContainer.setBorder(new EmptyBorder(50,50,50,50));
-        gameOver = createJLabel("");
-        gameContainer.add(gameOver);
-        gameOver.setVisible(false);
         gameContainer.add(gauf, BorderLayout.CENTER);
 
         //creer panel de controle
         JPanel droite = new JPanel();
         droite.setLayout(new BoxLayout(droite,BoxLayout.Y_AXIS));
         droite.setBorder(new EmptyBorder(50,50,50,50));
-     
+
+        //première interface pour doite
+        choixjeu = createJLabel("Jouer VS : ");
+        Joueur1_VS_Joueur2=createJButton("Joueur 1 vs Joueur 2");
+        Joueur_Vs_AI=createJButton("Joueur vs AI");
+
+        droite.add(Box.createGlue());
+        droite.add(choixjeu);
+        droite.add(Box.createVerticalStrut(40));
+        droite.add(Joueur1_VS_Joueur2);
+        droite.add(Box.createVerticalStrut(10));
+        droite.add(Joueur_Vs_AI);
+        droite.add(Box.createGlue());
+
         //creer et ajouter composants d'interface
         joueur = createJLabel("joueur en cours: 1");
         annuler = createToggleButton("annuler");
@@ -77,7 +89,9 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
         sauvegarder.addActionListener(new AdaptateurSauvegarder(control));
         restaurer.addActionListener(new AdaptateurRestaurer(control));
         nouvellePartie.addActionListener(new AdaptateurNouvellePartie( control));
-        
+        Joueur_Vs_AI.addActionListener(new AdaptateurJoueurVsIA(control));
+        Joueur1_VS_Joueur2.addActionListener(new AdaptateurJoueurVsJoueur(control));
+
         jeu.ajouteObservateur(this);
         
         //Timer chrono = new Timer(16,)
@@ -124,26 +138,41 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
         gauf.repaint();
         int joueurEnCours = jeu.getJoueur() + 1;
         joueur.setText("joueur en cours: " + joueurEnCours);
+        annuler.setEnabled(true);
+        rejouer.setEnabled(true);
+        sauvegarder.setEnabled(true);
+        restaurer.setEnabled(true);
+        nouvellePartie.setEnabled(true);
+
+        if (gameOver != null) {
+            gameOver.setVisible(false);
+            gameContainer.remove(gameOver);
+            gameContainer.add(gauf, BorderLayout.CENTER);
+            gameContainer.revalidate();
+            gameContainer.repaint();
+        }
+        
         if (jeu.jeuTermine()) {
            defaite(joueurEnCours);
         }
-
-
     }
 
     public void defaite(int joueurGagnant) {
-        gameOver.setText("Game Over - Joueur " + joueurGagnant + " gagne !");
-        gameOver.setVisible(true);
-        gauf.setVisible(false);
+        gameContainer.remove(gauf);
+
+        gameOver = createJLabel("Game Over - Joueur " + joueurGagnant + " gagne !");
+        gameOver.setForeground(new Color(224, 133, 57));
+        gameOver.setHorizontalAlignment(SwingConstants.CENTER);
+
+        gameContainer.add(gameOver, BorderLayout.CENTER);
 
         annuler.setEnabled(false);
         rejouer.setEnabled(false);
         sauvegarder.setEnabled(false);
         restaurer.setEnabled(false);
         nouvellePartie.setEnabled(true);
+
+        gameContainer.revalidate(); 
+        gameContainer.repaint();    
     }
-
 }
-
-
-

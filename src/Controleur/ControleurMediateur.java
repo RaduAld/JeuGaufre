@@ -18,7 +18,7 @@ public class ControleurMediateur implements CollecteurEvenements {
     Animation mouvement;
     boolean animationsSupportees, animationsActives;
     int lenteurJeuAutomatique;
-    // IA joueurAutomatique;
+    IA joueurAutomatique;
     boolean IAActive;
     AnimationJeuAutomatique animationIA;
     IA[] joueursAutomatiques; // on va faire jouer des IA l'une contre l'autre, ça remplace joueurAutomatique
@@ -80,7 +80,6 @@ void restaurer() {
             if (jeu.jeuTermine()){
                 int gagnant = (jeu.getJoueur() + 1) % 2;
                 Configuration.info("Partie finie ! Le vainqueur est: : "+ gagnant);
-
             }
     }
 
@@ -90,7 +89,7 @@ void restaurer() {
 
     public void basculeModeJoueur(){
         //flip entre joueur et IA dans le player
-        //car quand on lance la partie, on est par défaut en player vs player, donc on voudra activer l'ia pour le second joeururuerufhuerih JOUEUR
+        //car quand on lance la partie, on est par défaut en player vs player, donc on voudra activer l'ia pour le second JOUEUR
         if(typeJoueur[1] == 0){
             typeJoueur[1] = 1;
             if(joueursAutomatiques[1] == null){
