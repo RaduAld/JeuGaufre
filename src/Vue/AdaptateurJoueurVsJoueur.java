@@ -12,6 +12,6 @@ public class AdaptateurJoueurVsJoueur implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        
+        control.toucheClavier("JoueurVsJoueur");
     }
 }

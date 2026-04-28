@@ -5,6 +5,7 @@ import Patterns.Observable;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Modèle du Jeu de Gaufre.
@@ -36,7 +37,7 @@ import java.util.ArrayList;
  *
  * Nombre de configurations : C(M+N, M).
  */
-public class Jeu extends Observable {
+public class Jeu extends Observable implements Cloneable {
 
     private int lignes;
     private int colonnes;
@@ -60,7 +61,46 @@ public class Jeu extends Observable {
         initialiserGrille();
     }
 
+    public List<boolean[]> get_children(){
+        List<boolean[]> children = new ArrayList<>();
+        for(int i=0; i<grille.length; i++) {
+            if (grille[i]) {
+                for (int j = i + 1; j < grille.length; j++) {
+                    if (!grille[j]) {
+                        boolean[] configPermutation = copy();
+                        configPermutation[i] = false;
+                        configPermutation[j] = true;
+                        children.add(configPermutation);
+                    }
+                }
+            }
+        }
+        return children;
+    }
+
+    public boolean[] copy(){
+        boolean[] result = new boolean[grille.length];
+        for(int i=0; i<grille.length; i++){
+            result[i] = false;
+            if (grille[i]) result[i] = true;
+        }
+        return result;
+    }
+
     public Jeu(int joueur) { this(5, 7, joueur); }
+
+    @Override
+    public Jeu clone() {
+        try {
+            Jeu clone        = (Jeu) super.clone();
+            clone.grille     = grille.clone();      // copie du tableau de bits
+            clone.historique = new Historique();    // historique vide
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
 
     // -------------------------------------------------------------------------
     // Initialisation
@@ -298,5 +338,103 @@ public class Jeu extends Observable {
             System.out.println();
         }
         System.out.println();
+    }
+
+    // -------------------------------------------------------------------------
+    // Fonctions de comparaison (pour IA)
+    // -------------------------------------------------------------------------
+
+    /**
+     * True si les deux jeux ont exactement le même vecteur grille bit à bit.
+     * Utilisé par l'IA pour détecter des configurations identiques.
+     */
+    public static boolean compareGrille(boolean[] g1, boolean[] g2) {
+        if (g1.length != g2.length) return false;
+        for (int k = 0; k < g1.length; k++) {
+            if (g1[k] != g2[k]) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Retourne le nombre de cases de gaufre encore présentes,
+     * c'est-à-dire toutes les cases présentes SAUF le poison (0,0).
+     */
+    public static int compteCasesRestantes(boolean[] configuration, int lignes){
+        int l = lignes;
+        int cases = 0;
+        for(int i=0; i<configuration.length; i++){
+            if(configuration[i]){
+                cases += l;
+            }else{
+                l--;
+            }
+        }
+        return cases;
+    }
+
+    public static boolean[] copy(boolean[] configuration){
+        boolean[] result = new boolean[configuration.length];
+        for(int i=0; i<configuration.length; i++){
+            result[i] = false;
+            if (configuration[i]) result[i] = true;
+        }
+        return result;
+    }
+    public static List<boolean[]> get_children(boolean[] configuration){
+        List<boolean[]> children = new ArrayList<>();
+        for(int i=0; i<configuration.length; i++) {
+            if (configuration[i]) {
+                for (int j = i + 1; j < configuration.length; j++) {
+                    if (!configuration[j]) {
+                        boolean[] configPermutation = copy(configuration);
+                        configPermutation[i] = false;
+                        configPermutation[j] = true;
+                        children.add(configPermutation);
+                    }
+                }
+            }
+        }
+        return children;
+    }
+    public static Coup getCoup(boolean[] init, boolean[] fin, int lignes){
+        int c = 0;
+        int l = lignes;
+        if (init.length != fin.length) return null;
+        int n = init.length;
+        int i = 0;
+        while (i < n && init[i] == fin[i]){
+            if (init[i]) c++;
+            else l--;
+            i++;
+        }
+        if (i < n){
+            while(!fin[i]){
+                l--;
+                i++;
+            }
+            return new Coup(l, c, init);
+        }
+        return null;
+    }
+    public static boolean[] initialConfig(int colonnes, int lignes){
+        boolean[] init_config = new boolean[colonnes + lignes];
+        for (int i=0; i<colonnes; i++){
+            init_config[i] = true;
+        }
+        for (int i=colonnes; i<lignes+colonnes; i++){
+            init_config[i] = false;
+        }
+        return init_config;
+    }
+    public static boolean[] losingConfig(int colonnes, int lignes){
+        boolean[] losing_config = new boolean[colonnes + lignes];
+        for (int i=0; i<lignes; i++){
+            losing_config[i] = false;
+        }
+        for (int i=lignes; i<colonnes+lignes; i++){
+            losing_config[i] = true;
+        }
+        return losing_config;
     }
 }
