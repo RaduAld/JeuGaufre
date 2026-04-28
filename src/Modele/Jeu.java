@@ -36,7 +36,7 @@ import java.util.ArrayList;
  *
  * Nombre de configurations : C(M+N, M).
  */
-public class Jeu extends Observable {
+public class Jeu extends Observable implements Cloneable {
 
     private int lignes;
     private int colonnes;
@@ -61,6 +61,19 @@ public class Jeu extends Observable {
     }
 
     public Jeu(int joueur) { this(5, 7, joueur); }
+
+    @Override
+    public Jeu clone() {
+        try {
+            Jeu clone        = (Jeu) super.clone();
+            clone.grille     = grille.clone();      // copie du tableau de bits
+            clone.historique = new Historique();    // historique vide
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
 
     // -------------------------------------------------------------------------
     // Initialisation
@@ -298,5 +311,54 @@ public class Jeu extends Observable {
             System.out.println();
         }
         System.out.println();
+    }
+
+    // -------------------------------------------------------------------------
+    // Fonctions de comparaison (pour IA)
+    // -------------------------------------------------------------------------
+
+    /**
+     * True si les deux jeux ont exactement le même vecteur grille bit à bit.
+     * Utilisé par l'IA pour détecter des configurations identiques.
+     */
+    public static boolean compareGrille(boolean[] g1, boolean[] g2) {
+        if (g1.length != g2.length) return false;
+        for (int k = 0; k < g1.length; k++) {
+            if (g1[k] != g2[k]) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Retourne le nombre de cases de gaufre encore présentes,
+     * c'est-à-dire toutes les cases présentes SAUF le poison (0,0).
+     */
+    public int casesGaufresRestantes() {
+        int[] w = GrilleHelper.toutesLargeurs(grille, lignes);
+        int total = 0;
+        for (int width : w) total += width;
+        // total = toutes les cases présentes (gaufres + poison)
+        return total -1;
+    }
+
+    public Coup getCoup( boolean[] fin){
+        int c = 0;
+        int l = this.getLignes();
+        if (this.grille.length != fin.length) return null;
+        int n = this.grille.length;
+        int i = 0;
+        while (i < n && this.grille[i] == fin[i]){
+            if (this.grille[i]) c++;
+            else l--;
+            i++;
+        }
+        if (i < n){
+            while(!fin[i]){
+                l--;
+                i++;
+            }
+            return new Coup(l, c, this.grille);
+        }
+        return null;
     }
 }
