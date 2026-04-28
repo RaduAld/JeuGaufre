@@ -32,13 +32,14 @@ public class IAEtOu extends IA{
                 return this.hashmap.get(state);
             }
         }
-
+        //if we are in a losing config, that means that the previous player played that move (manger 0,0), so it's actually a winning move from the ai's perspective
         if (Jeu.compareGrille(configuration, Jeu.losingConfig(jeu.getColonnes(), jeu.getLignes()))){
-            hashmap.put(toChaine(configuration), false);
-            return false;
+            //changing from false to true
+            hashmap.put(toChaine(configuration), true);
+            return true;
         }
         // generate all subtrees and evaluate them
-        List<boolean[]> possible_coupes = Jeu.get_children(configuration);
+        List<boolean[]> possible_coupes = Jeu.get_children(configuration,  jeu.getLignes(), jeu.getColonnes());
         for (boolean[] state : possible_coupes){
             boolean outcome = evaluate(state);
             // if exists winning outcome, we return true
@@ -53,7 +54,7 @@ public class IAEtOu extends IA{
     }
 
     boolean[] getFinalConfig(boolean[] init){
-        List<boolean[]> children = Jeu.get_children(init);
+        List<boolean[]> children = Jeu.get_children(init,  jeu.getLignes(), jeu.getColonnes());
         List<boolean[]> winning_children = new ArrayList<>();
         for(boolean[] child : children){
             if (!evaluate(child)) {
