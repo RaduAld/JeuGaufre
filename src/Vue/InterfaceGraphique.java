@@ -11,7 +11,7 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
     Gaufre gauf;
     JLabel gameOver,joueur, choixjeu;
     JToggleButton annuler,rejouer;
-    JButton sauvegarder,restaurer,nouvellePartie, Joueur1_VS_Joueur2, Joueur_Vs_AI;
+    JButton sauvegarder,restaurer,nouvellePartie, Joueur_Vs_AI;
     CollecteurEvenements control;
     JFrame frame;
     JPanel gameContainer;
@@ -31,7 +31,7 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
     @Override
     public void run(){
         frame = new JFrame("Gaufre");
-        frame.setSize(800, 400);
+        frame.setSize(800, 500);
         gauf = new Gaufre(jeu);
 
         //creer panel de jeu
@@ -43,18 +43,15 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
         JPanel droite = new JPanel();
         droite.setLayout(new BoxLayout(droite,BoxLayout.Y_AXIS));
         droite.setBorder(new EmptyBorder(50,50,50,50));
-
         //première interface pour doite
-        choixjeu = createJLabel("Jouer VS : ");
-        Joueur1_VS_Joueur2=createJButton("Joueur 1 vs Joueur 2");
+        choixjeu = createJLabel("Joueur VS : Joueur");
         Joueur_Vs_AI=createJButton("Joueur vs AI");
-
-        droite.add(Box.createGlue());
         droite.add(choixjeu);
-        droite.add(Box.createVerticalStrut(40));
-        droite.add(Joueur1_VS_Joueur2);
-        droite.add(Box.createVerticalStrut(10));
+        droite.add(Box.createVerticalStrut(20));
         droite.add(Joueur_Vs_AI);
+        droite.add(Box.createVerticalStrut(20));
+        droite.add(Box.createVerticalStrut(10));
+
         droite.add(Box.createGlue());
 
         //creer et ajouter composants d'interface
@@ -90,7 +87,6 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
         restaurer.addActionListener(new AdaptateurRestaurer(control));
         nouvellePartie.addActionListener(new AdaptateurNouvellePartie( control));
         Joueur_Vs_AI.addActionListener(new AdaptateurJoueurVsIA(control));
-        Joueur1_VS_Joueur2.addActionListener(new AdaptateurJoueurVsJoueur(control));
 
         jeu.ajouteObservateur(this);
         
@@ -103,7 +99,13 @@ public class InterfaceGraphique implements Runnable,InterfaceUtilisateur, Observ
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    
+    @Override
+    public void toggleIA(boolean b){
+        if(b)
+            choixjeu.setText("Joueur VS : IA");
+        else
+            choixjeu.setText("Joueur VS : Joueur");
+    }
     private JButton createJButton(String texte){
         JButton button = new JButton(texte);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);

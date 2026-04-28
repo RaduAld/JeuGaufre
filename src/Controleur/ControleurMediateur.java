@@ -98,12 +98,14 @@ void restaurer() {
             }
              animationIA = null;
              Configuration.info("Joueur vs IA");
+             vue.toggleIA(true);
         }
         else{
             //on est deja dans le cas où c'est une IA, on la FLIP vers un joueur
              typeJoueur[1] = 0;
              animationIA = null; 
              Configuration.info("Joueur vs Joueur");
+            vue.toggleIA(false);
         }
     }
 
