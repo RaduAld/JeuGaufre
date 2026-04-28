@@ -7,7 +7,6 @@ import java.util.ArrayList;
 public abstract class IA {
     //j'ai change de private a public, mauvaise pratique sans doute...
     public Jeu jeu;
-    int[][] grille;
 
     public static IA nouvelle(Jeu j) {
         IA resultat = null;
@@ -17,12 +16,12 @@ public abstract class IA {
             case "Aleatoire":
                 resultat = new IAAleatoire();
                 break;
-            /*case "Teleportations":
+            case "GagnantPerdant":
                 resultat = new IAGagnantPerdant();
                 break;
-            case "ParcoursFixe":
+            case "EtOu":
                 resultat = new IAEtOu();
-                break;*/
+                break;
             default:
                 Configuration.erreur("IA de type " + type + " non supportée");
         }
