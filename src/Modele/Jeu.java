@@ -9,32 +9,32 @@ import java.util.List;
 
 /**
  * Modèle du Jeu de Gaufre.
- *
+ * <p>
  * ==========================================================================
  * REPRÉSENTATION — boolean[] grille  (taille M+N, source unique de vérité)
  * ==========================================================================
- *
+ * <p>
  * Encode le chemin en escalier (staircase path) :
- *   true  (1) → pas droite : avance le compteur de colonnes
- *   false (0) ↓ pas bas    : termine la ligne courante
- *
+ * true  (1) → pas droite : avance le compteur de colonnes
+ * false (0) ↓ pas bas    : termine la ligne courante
+ * <p>
  * Les lignes sont stockées en ordre INVERSE dans le vecteur :
- *   index interne 0     = ligne de jeu M-1 (bas, la plus large)
- *   index interne M-1   = ligne de jeu 0   (haut, contient le poison)
- *
+ * index interne 0     = ligne de jeu M-1 (bas, la plus large)
+ * index interne M-1   = ligne de jeu 0   (haut, contient le poison)
+ * <p>
  * Grille pleine M×N : [true×N, false×M]   ex 3×4 : [T,T,T,T,F,F,F]
  * → w interne = [4,4,4], correspondant aux lignes de jeu 2,1,0
  * → hauteur(0)=4, hauteur(1)=4, hauteur(2)=4  ✓
- *
+ * <p>
  * Coup (l, c) : supprime les cases (l', c') avec l' >= l ET c' >= c
- *   → hauteur(i) = min(hauteur(i), c) pour toutes les lignes de jeu i >= l
- *   → en interne : w[j] = min(w[j], c) pour j in [0 .. M-1-l]
- *
+ * → hauteur(i) = min(hauteur(i), c) pour toutes les lignes de jeu i >= l
+ * → en interne : w[j] = min(w[j], c) pour j in [0 .. M-1-l]
+ * <p>
  * Poison = case (0,0).  jeuTermine() ↔ hauteur(0)==0 ↔ w[M-1]==0.
- *
+ * <p>
  * Undo : restaure grille entière depuis Coup.savedGrille (copie complète).
  * Redo : ré-applique applyMove.
- *
+ * <p>
  * Nombre de configurations : C(M+N, M).
  */
 public class Jeu extends Observable implements Cloneable {
@@ -43,7 +43,9 @@ public class Jeu extends Observable implements Cloneable {
     private int colonnes;
     private int joueur;
 
-    /** Vecteur de M+N bits — source unique de vérité sur l'état de la grille. */
+    /**
+     * Vecteur de M+N bits — source unique de vérité sur l'état de la grille.
+     */
     private boolean[] grille;
 
     private Historique historique;
@@ -53,17 +55,17 @@ public class Jeu extends Observable implements Cloneable {
     // -------------------------------------------------------------------------
 
     public Jeu(int lignes, int colonnes, int joueur) {
-        this.lignes   = lignes;
+        this.lignes = lignes;
         this.colonnes = colonnes;
-        this.joueur   = joueur;
-        historique    = new Historique();
-        grille        = new boolean[lignes + colonnes];
+        this.joueur = joueur;
+        historique = new Historique();
+        grille = new boolean[lignes + colonnes];
         initialiserGrille();
     }
 
-    public List<boolean[]> get_children(){
+    public List<boolean[]> get_children() {
         List<boolean[]> children = new ArrayList<>();
-        for(int i=0; i<grille.length; i++) {
+        for (int i = 0; i < grille.length; i++) {
             if (grille[i]) {
                 for (int j = i + 1; j < grille.length; j++) {
                     if (!grille[j]) {
@@ -78,22 +80,24 @@ public class Jeu extends Observable implements Cloneable {
         return children;
     }
 
-    public boolean[] copy(){
+    public boolean[] copy() {
         boolean[] result = new boolean[grille.length];
-        for(int i=0; i<grille.length; i++){
+        for (int i = 0; i < grille.length; i++) {
             result[i] = false;
             if (grille[i]) result[i] = true;
         }
         return result;
     }
 
-    public Jeu(int joueur) { this(5, 7, joueur); }
+    public Jeu(int joueur) {
+        this(5, 7, joueur);
+    }
 
     @Override
     public Jeu clone() {
         try {
-            Jeu clone        = (Jeu) super.clone();
-            clone.grille     = grille.clone();      // copie du tableau de bits
+            Jeu clone = (Jeu) super.clone();
+            clone.grille = grille.clone();      // copie du tableau de bits
             clone.historique = new Historique();    // historique vide
             return clone;
         } catch (CloneNotSupportedException e) {
@@ -106,9 +110,11 @@ public class Jeu extends Observable implements Cloneable {
     // Initialisation
     // -------------------------------------------------------------------------
 
-    /** Grille pleine : [true×N, false×M].  Ex 3×4 → [T,T,T,T,F,F,F]. */
+    /**
+     * Grille pleine : [true×N, false×M].  Ex 3×4 → [T,T,T,T,F,F,F].
+     */
     private void initialiserGrille() {
-        for (int k = 0; k < colonnes; k++)                 grille[k] = true;
+        for (int k = 0; k < colonnes; k++) grille[k] = true;
         for (int k = colonnes; k < lignes + colonnes; k++) grille[k] = false;
     }
 
@@ -116,19 +122,34 @@ public class Jeu extends Observable implements Cloneable {
     // Accesseurs
     // -------------------------------------------------------------------------
 
-    public int getJoueur()   { return joueur;   }
-    public int getLignes()   { return lignes;   }
-    public int getColonnes() { return colonnes; }
-    public Historique getHistorique() { return historique; }
+    public int getJoueur() {
+        return joueur;
+    }
 
-    /** Copie défensive du vecteur grille (taille M+N). */
+    public int getLignes() {
+        return lignes;
+    }
+
+    public int getColonnes() {
+        return colonnes;
+    }
+
+    public Historique getHistorique() {
+        return historique;
+    }
+
+    /**
+     * Copie défensive du vecteur grille (taille M+N).
+     */
     public boolean[] getGrille() {
         boolean[] copie = new boolean[grille.length];
         System.arraycopy(grille, 0, copie, 0, grille.length);
         return copie;
     }
 
-    /** Nombre de cases présentes dans la ligne de jeu l. */
+    /**
+     * Nombre de cases présentes dans la ligne de jeu l.
+     */
     public int hauteur(int l) {
         if (l < 0 || l >= lignes) return 0;
         return GrilleHelper.hauteur(grille, l, lignes);
@@ -138,20 +159,34 @@ public class Jeu extends Observable implements Cloneable {
     // Consultation de l'état d'une case
     // -------------------------------------------------------------------------
 
-    /** True si la case (l, c) est présente : c < hauteur(l). */
+    /**
+     * True si la case (l, c) est présente : c < hauteur(l).
+     */
     public boolean estPresente(int l, int c) {
         if (l < 0 || l >= lignes || c < 0 || c >= colonnes) return false;
         return GrilleHelper.estPresente(grille, l, c, lignes);
     }
 
-    /** True si (l, c) est le poison (coin haut-gauche, toujours (0,0)). */
-    public boolean estPoison(int l, int c) { return l == 0 && c == 0; }
+    /**
+     * True si (l, c) est le poison (coin haut-gauche, toujours (0,0)).
+     */
+    public boolean estPoison(int l, int c) {
+        return l == 0 && c == 0;
+    }
 
-    /** True si (l, c) est une gaufre (présente et pas le poison). */
-    public boolean estGaufre(int l, int c) { return estPresente(l, c) && !estPoison(l, c); }
+    /**
+     * True si (l, c) est une gaufre (présente et pas le poison).
+     */
+    public boolean estGaufre(int l, int c) {
+        return estPresente(l, c) && !estPoison(l, c);
+    }
 
-    /** True si (l, c) a été mangée. */
-    public boolean estVide(int l, int c) { return !estPresente(l, c); }
+    /**
+     * True si (l, c) a été mangée.
+     */
+    public boolean estVide(int l, int c) {
+        return !estPresente(l, c);
+    }
 
     // -------------------------------------------------------------------------
     // Logique de jeu
@@ -161,25 +196,31 @@ public class Jeu extends Observable implements Cloneable {
      * True si le jeu est terminé : hauteur(0)==0
      * (la ligne du haut, qui contient le poison, est vide).
      */
-    public boolean jeuTermine() { return GrilleHelper.jeuTermine(grille, lignes); }
+    public boolean jeuTermine() {
+        return GrilleHelper.jeuTermine(grille, lignes);
+    }
 
-    /** Alterne le joueur courant. */
-    public void joueurSuivant() { joueur = (joueur + 1) % 2; }
+    /**
+     * Alterne le joueur courant.
+     */
+    public void joueurSuivant() {
+        joueur = (joueur + 1) % 2;
+    }
 
     /**
      * Joue le coup (l, c) si valide.
-     *
+     * <p>
      * Validité : jeu non terminé, 0≤l<M, 0≤c<N, case (l,c) présente.
      * Effet    : supprime toutes les cases (l', c') avec l'>=l ET c'>=c.
-     *            → hauteur(i) = min(hauteur(i), c) pour i in [l..M-1].
+     * → hauteur(i) = min(hauteur(i), c) pour i in [l..M-1].
      *
      * @return true si le coup a été accepté et joué
      */
     public boolean joue(int l, int c) {
-        if (jeuTermine())               return false;
-        if (l < 0 || l >= lignes)       return false;
-        if (c < 0 || c >= colonnes)     return false;
-        if (!estPresente(l, c))         return false;
+        if (jeuTermine()) return false;
+        if (l < 0 || l >= lignes) return false;
+        if (c < 0 || c >= colonnes) return false;
+        if (!estPresente(l, c)) return false;
 
         // Copie complète du vecteur grille avant modification (pour undo)
         boolean[] savedGrille = GrilleHelper.saveGrille(grille);
@@ -199,8 +240,8 @@ public class Jeu extends Observable implements Cloneable {
 
     public void nouvellePartie() {
         historique = new Historique();
-        grille     = new boolean[lignes + colonnes];
-        joueur     = 0;
+        grille = new boolean[lignes + colonnes];
+        joueur = 0;
         initialiserGrille();
         metAJour();
     }
@@ -209,8 +250,13 @@ public class Jeu extends Observable implements Cloneable {
     // Annuler / Refaire
     // -------------------------------------------------------------------------
 
-    public boolean peutAnnuler() { return historique.peutAnnuler(); }
-    public boolean peutRefaire() { return historique.peutRefaire(); }
+    public boolean peutAnnuler() {
+        return historique.peutAnnuler();
+    }
+
+    public boolean peutRefaire() {
+        return historique.peutRefaire();
+    }
 
     /**
      * Annule le dernier coup : restaure l'intégralité du vecteur grille
@@ -218,7 +264,10 @@ public class Jeu extends Observable implements Cloneable {
      */
     public Coup annule() {
         Coup c = historique.annule(grille);
-        if (c != null) { joueurSuivant(); metAJour(); }
+        if (c != null) {
+            joueurSuivant();
+            metAJour();
+        }
         return c;
     }
 
@@ -227,7 +276,10 @@ public class Jeu extends Observable implements Cloneable {
      */
     public Coup refais() {
         Coup c = historique.refais(grille, lignes, colonnes);
-        if (c != null) { joueurSuivant(); metAJour(); }
+        if (c != null) {
+            joueurSuivant();
+            metAJour();
+        }
         return c;
     }
 
@@ -251,16 +303,26 @@ public class Jeu extends Observable implements Cloneable {
         File fichier = new File("res" + File.separator + "Jeux" + File.separator + nomFichier);
         fichier.getParentFile().mkdirs();
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fichier))) {
-            bw.write(lignes + " " + colonnes + " " + joueur); bw.newLine();
+            bw.write(lignes + " " + colonnes + " " + joueur);
+            bw.newLine();
             StringBuilder sb = new StringBuilder(grille.length);
             for (boolean b : grille) sb.append(b ? '1' : '0');
-            bw.write(sb.toString()); bw.newLine();
+            bw.write(sb.toString());
+            bw.newLine();
             ArrayList<Coup> passe = historique.getCoupsPasse();
-            bw.write(String.valueOf(passe.size())); bw.newLine();
-            for (Coup cp : passe) { bw.write(encoderCoup(cp)); bw.newLine(); }
+            bw.write(String.valueOf(passe.size()));
+            bw.newLine();
+            for (Coup cp : passe) {
+                bw.write(encoderCoup(cp));
+                bw.newLine();
+            }
             ArrayList<Coup> futur = historique.getCoupsFutur();
-            bw.write(String.valueOf(futur.size())); bw.newLine();
-            for (Coup cp : futur) { bw.write(encoderCoup(cp)); bw.newLine(); }
+            bw.write(String.valueOf(futur.size()));
+            bw.newLine();
+            for (Coup cp : futur) {
+                bw.write(encoderCoup(cp));
+                bw.newLine();
+            }
         }
         metAJour();
     }
@@ -273,12 +335,13 @@ public class Jeu extends Observable implements Cloneable {
     }
 
     public void charger(String nomFichier) throws IOException {
+        File fichier = new File("res" + File.separator + "Jeux" + File.separator + nomFichier);
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(Configuration.ouvre("Jeux/" + nomFichier)))) {
-            String[] entete  = br.readLine().trim().split(" ");
-            int nouvLignes   = Integer.parseInt(entete[0]);
+                new InputStreamReader(new FileInputStream(fichier)))) {
+            String[] entete = br.readLine().trim().split(" ");
+            int nouvLignes = Integer.parseInt(entete[0]);
             int nouvColonnes = Integer.parseInt(entete[1]);
-            int nouvJoueur   = Integer.parseInt(entete[2]);
+            int nouvJoueur = Integer.parseInt(entete[2]);
             String grilleStr = br.readLine().trim();
             int tailleAttendue = nouvLignes + nouvColonnes;
             if (grilleStr.length() != tailleAttendue)
@@ -286,7 +349,7 @@ public class Jeu extends Observable implements Cloneable {
             boolean[] nouvGrille = new boolean[tailleAttendue];
             for (int k = 0; k < tailleAttendue; k++) {
                 char ch = grilleStr.charAt(k);
-                if      (ch == '1') nouvGrille[k] = true;
+                if (ch == '1') nouvGrille[k] = true;
                 else if (ch == '0') nouvGrille[k] = false;
                 else throw new IOException("Caractère invalide : '" + ch + "'");
             }
@@ -296,10 +359,10 @@ public class Jeu extends Observable implements Cloneable {
             int nbFutur = Integer.parseInt(br.readLine().trim());
             ArrayList<Coup> futurChrono = new ArrayList<>(nbFutur);
             for (int n = 0; n < nbFutur; n++) futurChrono.add(decoderCoup(br.readLine()));
-            this.lignes     = nouvLignes;
-            this.colonnes   = nouvColonnes;
-            this.joueur     = nouvJoueur;
-            this.grille     = nouvGrille;
+            this.lignes = nouvLignes;
+            this.colonnes = nouvColonnes;
+            this.joueur = nouvJoueur;
+            this.grille = nouvGrille;
             this.historique = new Historique();
             this.historique.restaurer(passeChrono, futurChrono);
             metAJour();
@@ -331,9 +394,9 @@ public class Jeu extends Observable implements Cloneable {
             int h = hauteur(l);
             System.out.print("  ligne " + l + " [w=" + h + "] : ");
             for (int c = 0; c < colonnes; c++) {
-                if      (l == 0 && c == 0) System.out.print("☠ ");
-                else if (c < h)            System.out.print("■ ");
-                else                       System.out.print("· ");
+                if (l == 0 && c == 0) System.out.print("☠ ");
+                else if (c < h) System.out.print("■ ");
+                else System.out.print("· ");
             }
             System.out.println();
         }
@@ -360,30 +423,31 @@ public class Jeu extends Observable implements Cloneable {
      * Retourne le nombre de cases de gaufre encore présentes,
      * c'est-à-dire toutes les cases présentes SAUF le poison (0,0).
      */
-    public static int compteCasesRestantes(boolean[] configuration, int lignes){
+    public static int compteCasesRestantes(boolean[] configuration, int lignes) {
         int l = lignes;
         int cases = 0;
-        for(int i=0; i<configuration.length; i++){
-            if(configuration[i]){
+        for (int i = 0; i < configuration.length; i++) {
+            if (configuration[i]) {
                 cases += l;
-            }else{
+            } else {
                 l--;
             }
         }
         return cases;
     }
 
-    public static boolean[] copy(boolean[] configuration){
+    public static boolean[] copy(boolean[] configuration) {
         boolean[] result = new boolean[configuration.length];
-        for(int i=0; i<configuration.length; i++){
+        for (int i = 0; i < configuration.length; i++) {
             result[i] = false;
             if (configuration[i]) result[i] = true;
         }
         return result;
     }
-    public static List<boolean[]> get_children(boolean[] configuration){
+
+    public static List<boolean[]> get_children(boolean[] configuration) {
         List<boolean[]> children = new ArrayList<>();
-        for(int i=0; i<configuration.length; i++) {
+        for (int i = 0; i < configuration.length; i++) {
             if (configuration[i]) {
                 for (int j = i + 1; j < configuration.length; j++) {
                     if (!configuration[j]) {
@@ -397,19 +461,20 @@ public class Jeu extends Observable implements Cloneable {
         }
         return children;
     }
-    public static Coup getCoup(boolean[] init, boolean[] fin, int lignes){
+
+    public static Coup getCoup(boolean[] init, boolean[] fin, int lignes) {
         int c = 0;
         int l = lignes;
         if (init.length != fin.length) return null;
         int n = init.length;
         int i = 0;
-        while (i < n && init[i] == fin[i]){
+        while (i < n && init[i] == fin[i]) {
             if (init[i]) c++;
             else l--;
             i++;
         }
-        if (i < n){
-            while(!fin[i]){
+        if (i < n) {
+            while (!fin[i]) {
                 l--;
                 i++;
             }
@@ -417,22 +482,24 @@ public class Jeu extends Observable implements Cloneable {
         }
         return null;
     }
-    public static boolean[] initialConfig(int colonnes, int lignes){
+
+    public static boolean[] initialConfig(int colonnes, int lignes) {
         boolean[] init_config = new boolean[colonnes + lignes];
-        for (int i=0; i<colonnes; i++){
+        for (int i = 0; i < colonnes; i++) {
             init_config[i] = true;
         }
-        for (int i=colonnes; i<lignes+colonnes; i++){
+        for (int i = colonnes; i < lignes + colonnes; i++) {
             init_config[i] = false;
         }
         return init_config;
     }
-    public static boolean[] losingConfig(int colonnes, int lignes){
+
+    public static boolean[] losingConfig(int colonnes, int lignes) {
         boolean[] losing_config = new boolean[colonnes + lignes];
-        for (int i=0; i<lignes; i++){
+        for (int i = 0; i < lignes; i++) {
             losing_config[i] = false;
         }
-        for (int i=lignes; i<colonnes+lignes; i++){
+        for (int i = lignes; i < colonnes + lignes; i++) {
             losing_config[i] = true;
         }
         return losing_config;
