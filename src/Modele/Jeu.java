@@ -5,6 +5,7 @@ import Patterns.Observable;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Modèle du Jeu de Gaufre.
@@ -58,6 +59,32 @@ public class Jeu extends Observable implements Cloneable {
         historique    = new Historique();
         grille        = new boolean[lignes + colonnes];
         initialiserGrille();
+    }
+
+    public List<boolean[]> get_children(){
+        List<boolean[]> children = new ArrayList<>();
+        for(int i=0; i<grille.length; i++) {
+            if (grille[i]) {
+                for (int j = i + 1; j < grille.length; j++) {
+                    if (!grille[j]) {
+                        boolean[] configPermutation = copy();
+                        configPermutation[i] = false;
+                        configPermutation[j] = true;
+                        children.add(configPermutation);
+                    }
+                }
+            }
+        }
+        return children;
+    }
+
+    public boolean[] copy(){
+        boolean[] result = new boolean[grille.length];
+        for(int i=0; i<grille.length; i++){
+            result[i] = false;
+            if (grille[i]) result[i] = true;
+        }
+        return result;
     }
 
     public Jeu(int joueur) { this(5, 7, joueur); }
@@ -333,22 +360,51 @@ public class Jeu extends Observable implements Cloneable {
      * Retourne le nombre de cases de gaufre encore présentes,
      * c'est-à-dire toutes les cases présentes SAUF le poison (0,0).
      */
-    public int casesGaufresRestantes() {
-        int[] w = GrilleHelper.toutesLargeurs(grille, lignes);
-        int total = 0;
-        for (int width : w) total += width;
-        // total = toutes les cases présentes (gaufres + poison)
-        return total -1;
+    public static int compteCasesRestantes(boolean[] configuration, int lignes){
+        int l = lignes;
+        int cases = 0;
+        for(int i=0; i<configuration.length; i++){
+            if(configuration[i]){
+                cases += l;
+            }else{
+                l--;
+            }
+        }
+        return cases;
     }
 
-    public Coup getCoup( boolean[] fin){
+    public static boolean[] copy(boolean[] configuration){
+        boolean[] result = new boolean[configuration.length];
+        for(int i=0; i<configuration.length; i++){
+            result[i] = false;
+            if (configuration[i]) result[i] = true;
+        }
+        return result;
+    }
+    public static List<boolean[]> get_children(boolean[] configuration){
+        List<boolean[]> children = new ArrayList<>();
+        for(int i=0; i<configuration.length; i++) {
+            if (configuration[i]) {
+                for (int j = i + 1; j < configuration.length; j++) {
+                    if (!configuration[j]) {
+                        boolean[] configPermutation = copy(configuration);
+                        configPermutation[i] = false;
+                        configPermutation[j] = true;
+                        children.add(configPermutation);
+                    }
+                }
+            }
+        }
+        return children;
+    }
+    public static Coup getCoup(boolean[] init, boolean[] fin, int lignes){
         int c = 0;
-        int l = this.getLignes();
-        if (this.grille.length != fin.length) return null;
-        int n = this.grille.length;
+        int l = lignes;
+        if (init.length != fin.length) return null;
+        int n = init.length;
         int i = 0;
-        while (i < n && this.grille[i] == fin[i]){
-            if (this.grille[i]) c++;
+        while (i < n && init[i] == fin[i]){
+            if (init[i]) c++;
             else l--;
             i++;
         }
@@ -357,8 +413,28 @@ public class Jeu extends Observable implements Cloneable {
                 l--;
                 i++;
             }
-            return new Coup(l, c, this.grille);
+            return new Coup(l, c, init);
         }
         return null;
+    }
+    public static boolean[] initialConfig(int colonnes, int lignes){
+        boolean[] init_config = new boolean[colonnes + lignes];
+        for (int i=0; i<colonnes; i++){
+            init_config[i] = true;
+        }
+        for (int i=colonnes; i<lignes+colonnes; i++){
+            init_config[i] = false;
+        }
+        return init_config;
+    }
+    public static boolean[] losingConfig(int colonnes, int lignes){
+        boolean[] losing_config = new boolean[colonnes + lignes];
+        for (int i=0; i<lignes; i++){
+            losing_config[i] = false;
+        }
+        for (int i=lignes; i<colonnes+lignes; i++){
+            losing_config[i] = true;
+        }
+        return losing_config;
     }
 }
